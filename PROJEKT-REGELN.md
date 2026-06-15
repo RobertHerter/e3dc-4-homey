@@ -2,6 +2,11 @@
 
 Diese Datei gilt für alle Arbeiten an diesem Repository (Fork **Copiis**, App `de.jnkconsulting.e3dc.v2`).
 
+## Community
+
+- Forum-Thread: [App für E3DC Hauskraftwerke](https://community.homey.app/t/app-pro-e3dc-hauskraftwerke/105181)
+- Nach Test-Publish: Changelog + Test-Link im Thread posten; auf Nutzer-Feedback warten vor Live-Release.
+
 ## Upload (Begriffe)
 
 | Nutzer sagt | Bedeutung |

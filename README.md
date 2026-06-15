@@ -3,7 +3,7 @@
 > **This is a community-maintained fork** of the original [jnk-cons/e3dc-4-homey](https://github.com/jnk-cons/e3dc-4-homey) which is no longer actively maintained.
 > Goal: keep the app working with current Homey, improve documentation, and **fully implement rich E3/DC Wallbox support** (more telemetry + control via RSCP for solar-optimized EV charging).
 
-Contributions, issues and PRs welcome on https://github.com/Copiis/e3dc-4-homey !
+Contributions, issues and PRs welcome on https://github.com/Copiis/e3dc-4-homey — discuss and report feedback in the [Homey community thread](https://community.homey.app/t/app-pro-e3dc-hauskraftwerke/105181).
 
 ---
 
