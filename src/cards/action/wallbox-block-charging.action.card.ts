@@ -2,7 +2,7 @@ import {RunListener} from '../run-listener';
 import {Wallbox} from '../../model/wallbox';
 import {resolveWallboxFlowResult} from './wallbox-flow-result';
 
-export class WallboxStopChargingActionCard implements RunListener {
+export class WallboxBlockChargingActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             const wallbox: Wallbox = args.device;
@@ -17,12 +17,12 @@ export class WallboxStopChargingActionCard implements RunListener {
                 resolveWallboxFlowResult(
                     result,
                     {},
-                    'Wallbox rejected the stop command',
+                    'Wallbox rejected block charging',
                     resolve,
                     reject,
                 );
             } catch (e) {
-                wallbox.error && wallbox.error('Failed to stop wallbox charging: ' + e);
+                wallbox.error && wallbox.error('Failed to block wallbox charging: ' + e);
                 reject(e);
             }
         });

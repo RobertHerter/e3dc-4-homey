@@ -1,11 +1,22 @@
 import {InternalDevice} from '../internal-api/internal-device';
 import {WallboxLiveState} from './wallbox-live-state';
 
+export interface WallboxCommandResult {
+    ok: boolean;
+    skipped: boolean;
+}
+
 export interface Wallbox extends InternalDevice{
     sync(state: WallboxLiveState): void
 
     /** Set max charging current (A) without changing the active mode. */
     setCurrentLimit(maxCurrentA: number): Promise<boolean>
+
+    /** Flow: allow/block charging with tile + RSCP read-back guard. */
+    applyChargingAllowed(enabled: boolean, maxCurrentA?: number): Promise<WallboxCommandResult>
+
+    /** Flow: enable/disable sun mode with tile + RSCP read-back guard. */
+    applySunMode(enabled: boolean, maxCurrentA?: number): Promise<WallboxCommandResult>
 
     /** Resume / allow charging (mixed mode, clears abort flag). */
     startCharging(maxCurrentA?: number): Promise<boolean>

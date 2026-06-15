@@ -1,5 +1,5 @@
 import {Data, DataParser, DefaultDataParser, WBTag} from 'easy-rscp';
-import {WALLBOX_EXTERN_DATA_LEN} from '../model/wallbox-control';
+import {WALLBOX_EXTERN_DATA_LEN, WALLBOX_EXTERN_SUN_MODE} from '../model/wallbox-control';
 import {
     WB_ALG_STATUS_CHARGING_ACTIVE,
     WB_ALG_STATUS_CHARGING_CANCELED,
@@ -36,16 +36,20 @@ export class WallboxExternAlgParser {
             return undefined;
         }
         const buffer = Buffer.from(byteBlock.valueAsHex, 'hex');
+        const modeByte = buffer.readUInt8(0);
         const statusByte = buffer.readUInt8(2);
-        const chargingCanceled = (statusByte & WB_ALG_STATUS_CHARGING_CANCELED) !== 0;
+        const abortByte = buffer.readUInt8(4);
+        const chargingCanceled = (statusByte & WB_ALG_STATUS_CHARGING_CANCELED) !== 0 || abortByte === 1;
         const chargingActive = (statusByte & WB_ALG_STATUS_CHARGING_ACTIVE) !== 0;
+        const sunModeActive = (statusByte & WB_ALG_STATUS_SUN_MODE) !== 0
+            || modeByte === WALLBOX_EXTERN_SUN_MODE;
         return {
-            socPercent: buffer.readUInt8(0),
+            socPercent: modeByte,
             activePhases: buffer.readUInt8(1),
             statusByte,
             maxCurrentA: buffer.readUInt8(3),
             schukoOn: buffer.readUInt8(5) !== 0,
-            sunModeActive: (statusByte & WB_ALG_STATUS_SUN_MODE) !== 0,
+            sunModeActive,
             chargingCanceled,
             chargingActive,
             plugLocked: (statusByte & WB_ALG_STATUS_PLUG_LOCKED) !== 0,

@@ -1,4 +1,8 @@
 {
+  "1.4.8": {
+    "de": "- Wallbox-Kachel: Laden + Sonnenmodus nur noch als Status-Sensor (kein Tippen mehr)\n- Flow: Laden freigeben/sperren, Sonnenmodus ein/aus mit RSCP-Rücklesen (kein Doppelbefehl)\n- Flow WENN: Sonnenmodus an/aus, Laden freigegeben/gesperrt — für Benachrichtigungen ohne Durchlauf",
+    "en": "- Wallbox tile: charging + sun mode as read-only status sensors (no tap)\n- Flow actions: allow/block charging, sun on/off with RSCP read-back (no duplicate commands)\n- Flow IF cards: sun/charging state — branch flows before notifications"
+  },
   "1.4.7": {
     "de": "- Wallbox: Laden + Sonnenmodus als zwei Buttons auf einer Seite (ohne evcharger_charging, kein Extra-Tab)",
     "en": "- Wallbox: charging and sun mode as two buttons on one page (no evcharger_charging, no extra tab)"

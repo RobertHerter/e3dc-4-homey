@@ -13,9 +13,8 @@
     "de": "Laden aus"
   },
   "getable": true,
-  "setable": true,
-  "uiComponent": "button",
-  "uiQuickAction": true,
+  "setable": false,
+  "uiComponent": "sensor",
   "icon": "/assets/images/ev-station.svg",
   "insights": false
 }

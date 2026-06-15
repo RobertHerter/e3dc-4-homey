@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -405,27 +405,11 @@
       "capabilitiesOptions": {
         "wallbox_charging": {
           "preventInsights": true,
-          "preventTag": true,
-          "titleTrue": {
-            "en": "Charging on",
-            "de": "Laden an"
-          },
-          "titleFalse": {
-            "en": "Charging off",
-            "de": "Laden aus"
-          }
+          "preventTag": true
         },
         "wallbox_sun_mode": {
           "preventInsights": true,
-          "preventTag": true,
-          "titleTrue": {
-            "en": "Sun mode on",
-            "de": "Sonnenmodus an"
-          },
-          "titleFalse": {
-            "en": "Sun mode off",
-            "de": "Sonnenmodus aus"
-          }
+          "preventTag": true
         }
       },
       "energy": {
@@ -938,6 +922,114 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=home-power-station"
+          }
+        ]
+      },
+      {
+        "id": "wallbox_sun_mode_is_active",
+        "title": {
+          "de": "Sonnenmodus ist an",
+          "en": "Sun mode is on"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Sonnenmodus ist an",
+          "en": "[[device]] sun mode is on"
+        },
+        "hint": {
+          "de": "Prüft den Kachel-Sensor. Für „Sonnenmodus aus“ oder Benachrichtigung „Sonnenmodus an“ nutzen.",
+          "en": "Checks the tile sensor. Use for \"Sun mode off\" or a \"sun mode on\" notification."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          }
+        ]
+      },
+      {
+        "id": "wallbox_charging_is_allowed",
+        "title": {
+          "de": "Laden ist freigegeben",
+          "en": "Charging is allowed"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Laden ist freigegeben",
+          "en": "[[device]] charging is allowed"
+        },
+        "hint": {
+          "de": "Prüft den Kachel-Sensor. Für „Laden sperren“ oder Benachrichtigung „Laden an“ nutzen.",
+          "en": "Checks the tile sensor. Use for \"Block charging\" or a \"charging on\" notification."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          }
+        ]
+      },
+      {
+        "id": "wallbox_sun_mode_is_off",
+        "title": {
+          "de": "Sonnenmodus ist aus",
+          "en": "Sun mode is off"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Sonnenmodus ist aus",
+          "en": "[[device]] sun mode is off"
+        },
+        "hint": {
+          "de": "Prüft den Kachel-Sensor. Davor schalten, damit „Sonnenmodus ein“ und Folgekarten (z. B. Benachrichtigung) nur laufen, wenn wirklich aus.",
+          "en": "Checks the tile sensor. Place before \"Sun mode on\" so follow-up cards (e.g. notifications) only run when off."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          }
+        ]
+      },
+      {
+        "id": "wallbox_charging_is_blocked",
+        "title": {
+          "de": "Laden ist gesperrt",
+          "en": "Charging is blocked"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Laden ist gesperrt",
+          "en": "[[device]] charging is blocked"
+        },
+        "hint": {
+          "de": "Prüft den Kachel-Sensor. Davor schalten, damit „Laden freigeben“ und Folgekarten nur laufen, wenn wirklich gesperrt.",
+          "en": "Checks the tile sensor. Place before \"Allow charging\" so follow-up cards only run when blocked."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
           }
         ]
       }
@@ -1485,6 +1577,140 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=home-power-station"
+          }
+        ]
+      },
+      {
+        "id": "wallbox_allow_charging",
+        "title": {
+          "de": "Laden freigeben",
+          "en": "Allow charging"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Laden freigeben (max. [[current]] A)",
+          "en": "[[device]] allow charging (max. [[current]] A)"
+        },
+        "hint": {
+          "de": "Erlaubt das Laden an der Wallbox (Mischmodus). Liest zuerst den RSCP-Zustand — kein Befehl, wenn bereits freigegeben.",
+          "en": "Allows wallbox charging (mixed mode). Reads RSCP state first — skips if already allowed."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "number",
+            "name": "current",
+            "title": {
+              "de": "Max. Strom (A)",
+              "en": "Max current (A)"
+            },
+            "required": false,
+            "min": 6,
+            "max": 32,
+            "step": 1,
+            "value": 16
+          }
+        ]
+      },
+      {
+        "id": "wallbox_block_charging",
+        "title": {
+          "de": "Laden sperren",
+          "en": "Block charging"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Laden sperren",
+          "en": "[[device]] block charging"
+        },
+        "hint": {
+          "de": "Stoppt bzw. sperrt das Laden. Liest zuerst den RSCP-Zustand — kein Befehl, wenn bereits gesperrt.",
+          "en": "Stops or blocks charging. Reads RSCP state first — skips if already blocked."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          }
+        ]
+      },
+      {
+        "id": "wallbox_sun_mode_on",
+        "title": {
+          "de": "Sonnenmodus ein",
+          "en": "Sun mode on"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Sonnenmodus ein (max. [[current]] A)",
+          "en": "[[device]] sun mode on (max. [[current]] A)"
+        },
+        "hint": {
+          "de": "Aktiviert den PV-Überschuss-Modus. Liest zuerst den RSCP-Zustand — kein Befehl, wenn bereits aktiv.",
+          "en": "Enables PV surplus mode. Reads RSCP state first — skips if already active."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "number",
+            "name": "current",
+            "title": {
+              "de": "Max. Strom (A)",
+              "en": "Max current (A)"
+            },
+            "required": false,
+            "min": 6,
+            "max": 32,
+            "step": 1,
+            "value": 16
+          }
+        ]
+      },
+      {
+        "id": "wallbox_sun_mode_off",
+        "title": {
+          "de": "Sonnenmodus aus",
+          "en": "Sun mode off"
+        },
+        "titleFormatted": {
+          "de": "[[device]] Sonnenmodus aus",
+          "en": "[[device]] sun mode off"
+        },
+        "hint": {
+          "de": "Deaktiviert den Sonnenmodus (Mischmodus). Liest zuerst den RSCP-Zustand — kein Befehl, wenn bereits aus.",
+          "en": "Disables sun mode (mixed mode). Reads RSCP state first — skips if already off."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=wallbox"
           }
         ]
       },
@@ -2440,9 +2666,8 @@
         "de": "Laden aus"
       },
       "getable": true,
-      "setable": true,
-      "uiComponent": "button",
-      "uiQuickAction": true,
+      "setable": false,
+      "uiComponent": "sensor",
       "icon": "/assets/images/ev-station.svg",
       "insights": false
     },
@@ -2461,9 +2686,8 @@
         "de": "Sonnenmodus aus"
       },
       "getable": true,
-      "setable": true,
-      "uiComponent": "button",
-      "uiQuickAction": true,
+      "setable": false,
+      "uiComponent": "sensor",
       "icon": "/assets/images/ev-station-solar.svg",
       "insights": false
     }

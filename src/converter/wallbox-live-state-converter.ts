@@ -39,7 +39,7 @@ export class WallboxLiveStateConverter implements FrameConverter<WallboxLiveStat
                         sunModeActive: alg?.sunModeActive ?? false,
                         chargingCanceled: alg?.chargingCanceled ?? false,
                         chargingActive: alg?.chargingActive ?? false,
-                        chargingEnabled: alg?.chargingEnabled ?? true,
+                        chargingEnabled: alg?.chargingEnabled ?? false,
                         plugged: alg?.plugged ?? false,
                         plugLocked: alg?.plugLocked ?? false,
                         schukoOn: alg?.schukoOn ?? false,

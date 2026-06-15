@@ -609,6 +609,36 @@ export class RscpApi {
         })
     }
 
+    readWallboxLiveStateById(wallboxId: number, allowReconnect: boolean = true, log: Logger): Promise<WallboxLiveState> {
+        return new Promise((resolve, reject) => {
+            log.log(`readWallboxLiveStateById(id=${wallboxId}): Requesting connection ...`)
+            this.getOpenConnection(log)
+                .then(con => this.readWallboxLiveState(con, [wallboxId], log))
+                .then(states => {
+                    const state = states.find(s => s.id === wallboxId) ?? states[0]
+                    if (!state) {
+                        reject(new Error(`No live state returned for wallbox id ${wallboxId}`))
+                        return
+                    }
+                    resolve(state)
+                })
+                .catch(e => {
+                    if (allowReconnect) {
+                        log.log(`readWallboxLiveStateById: error, reconnecting ... (${e})`)
+                        const currentConnection = connectionMap.get(this.getKey())
+                        this.closeConnection(currentConnection, log)
+                            .finally(() => {
+                                this.readWallboxLiveStateById(wallboxId, false, log)
+                                    .then(resolve)
+                                    .catch(reject)
+                            })
+                    } else {
+                        reject(e)
+                    }
+                })
+        })
+    }
+
     private readWallboxLiveState(con: HomePowerPlantConnection, ids: number[], log: Logger): Promise<WallboxLiveState[]> {
         return new Promise((resolve, reject) => {
             if (ids.length === 0) {
@@ -621,10 +651,14 @@ export class RscpApi {
                 .then(response => {
                     try {
                         const states = new WallboxLiveStateConverter().convert(response);
+                        if (states.length === 0) {
+                            log.log('readWallboxLiveState: no wallbox state blocks in response');
+                        }
                         states.forEach(state => {
                             log.log(
                                 `readWallboxLiveState id=${state.id}: chargingEnabled=${state.chargingEnabled}, `
-                                + `sunMode=${state.sunModeActive}, powerW=${state.powerW}`
+                                + `sunMode=${state.sunModeActive}, chargingActive=${state.chargingActive}, `
+                                + `chargingCanceled=${state.chargingCanceled}, powerW=${state.powerW}`,
                             );
                         });
                         resolve(states);

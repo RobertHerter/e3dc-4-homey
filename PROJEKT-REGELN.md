@@ -24,15 +24,33 @@ git push origin master
 - Vor dem Commit: Build muss fehlerfrei sein; keine Credentials in `env.json` o. Ä.
 - **Node.js v22+** (`nvm use` liest `.nvmrc`) — entspricht Homey-CLI-Anforderung.
 
+## Release-Ablauf (immer in dieser Reihenfolge)
+
+1. **Lokal testen** auf dem eigenen Homey — **immer zuerst**, vor Git-Push und vor Store-Publish.
+2. **Git** — erst nach erfolgreichem Lokaltest committen/pushen.
+3. **Store** — Test-Publish oder Live nur nach Lokaltest; Forum erst nach Test-Publish.
+
+```bash
+# Schritt 1 — Lokaltest (Pflicht)
+cd /home/arctic/Projekte/e3dc-4-homey
+nvm use
+npm run build && homey app install
+# → Wallbox-Kachel, HPS-Poll, Flow-Karten am Gerät prüfen
+
+# Schritt 2 — Repo (nach OK)
+git add -A && git commit -m "..." && git push origin master
+
+# Schritt 3 — Store (nach OK)
+homey app validate --level publish
+homey app publish
+# → im Developer Portal: Test, danach ggf. Live
+```
+
 ## Deployment (Homey)
 
-- **App auf den Homey**, wenn ausdrücklich gewünscht oder nach Repo-Upload mit gleicher Bitte.
-- Standardbefehl:
-  ```bash
-  npm run build && homey app install
-  ```
+- **App auf den Homey** = Schritt 1 des Release-Ablaufs (`homey app install`), nicht optional vor einem Publish.
 - Ziel-Homey: **Homey** (`192.168.188.62`), eingeloggt als `copiis@vivaldi.net`.
-- Nach Installation kurz prüfen, ob Version und Verhalten auf dem Gerät stimmen (Wallbox-Kachel, HPS-Poll, Flow-Karten).
+- `homey app run -r` nur für Live-Debugging; für dauerhaften Test **`homey app install`** verwenden.
 
 ## Version & Manifest
 
@@ -52,9 +70,10 @@ git push origin master
 ## Wallbox-UI (Homey)
 
 - Geräteklasse: `evcharger`.
-- Laden + Sonnenmodus: **`wallbox_charging`** und **`wallbox_sun_mode`**, beide `uiComponent: "button"`, `uiQuickAction: true` — **gleiche Seite**, kein Dropdown, kein Extra-Tab.
-- **`evcharger_charging` nicht verwenden** — belegt die Haupt-EV-Ansicht; weitere Controls landen dann auf einer zweiten Seite.
-- Keine zwei `toggle`-Capabilities — Homey macht daraus ein Dropdown.
+- **Kachel:** `wallbox_charging` und `wallbox_sun_mode` nur **Status** (`setable: false`, `uiComponent: sensor`) — Rücklesen vom HPS-Poll.
+- **Steuerung:** Flow-DANN-Karten mit RSCP-Rücklesen — `wallbox_allow_charging`, `wallbox_block_charging`, `wallbox_sun_mode_on`, `wallbox_sun_mode_off`.
+- **Vorbedingung (WENN):** `wallbox_sun_mode_is_off` / `_is_active`, `wallbox_charging_is_blocked` / `_is_allowed` — liest Kachel-Sensor, damit Folgekarten (Benachrichtigung) nicht laufen wenn schon im Zustand.
+- **`evcharger_charging` nicht verwenden** — belegt die Haupt-EV-Ansicht.
 
 ## Dokumentation
 

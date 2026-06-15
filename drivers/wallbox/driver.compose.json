@@ -14,27 +14,11 @@
   "capabilitiesOptions": {
     "wallbox_charging": {
       "preventInsights": true,
-      "preventTag": true,
-      "titleTrue": {
-        "en": "Charging on",
-        "de": "Laden an"
-      },
-      "titleFalse": {
-        "en": "Charging off",
-        "de": "Laden aus"
-      }
+      "preventTag": true
     },
     "wallbox_sun_mode": {
       "preventInsights": true,
-      "preventTag": true,
-      "titleTrue": {
-        "en": "Sun mode on",
-        "de": "Sonnenmodus an"
-      },
-      "titleFalse": {
-        "en": "Sun mode off",
-        "de": "Sonnenmodus aus"
-      }
+      "preventTag": true
     }
   },
   "energy": {
