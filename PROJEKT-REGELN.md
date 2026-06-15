@@ -22,6 +22,7 @@ git push origin master
 
 - Remote: `https://github.com/Copiis/e3dc-4-homey.git`
 - Vor dem Commit: Build muss fehlerfrei sein; keine Credentials in `env.json` o. Ä.
+- **Node.js v22+** (`nvm use` liest `.nvmrc`) — entspricht Homey-CLI-Anforderung.
 
 ## Deployment (Homey)
 

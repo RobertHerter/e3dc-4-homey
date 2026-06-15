@@ -9,14 +9,17 @@
   },
   "author": "Copiis (fork) / original Jochen Zink",
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "tsc"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^16.1.1",
+    "@tsconfig/node22": "^22.0.0",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.9",
-    "@types/node": "^20.10.2",
-    "typescript": "^5.3.2"
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "easy-rscp": "^0.9.1"
