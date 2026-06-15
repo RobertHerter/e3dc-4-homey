@@ -1,8 +1,8 @@
 site_name: E3DC 4 Homey
-site_author: Jochen Zink
-site_url: https://github.com/jnk-cons/e3dc-4-homey
-copyright: Copyright &copy; 2024 by, Jochen Zink
-repo_url: https://github.com/jnk-cons/e3dc-4-homey
+site_author: Copiis
+site_url: https://copiis.github.io/e3dc-4-homey/
+copyright: Copyright &copy; 2026 Copiis (community fork; original &copy; 2024 Jochen Zink)
+repo_url: https://github.com/Copiis/e3dc-4-homey
 nav:
   - Home: index.md
   - Setup: setup/setup.md

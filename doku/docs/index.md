@@ -21,5 +21,5 @@ The access data is only requested by the RSCP interface for authentication.
 
 ## Help wanted!
 The E3DC interface is not documented and I have to find out a lot by trial and error. I also only have one home power station and can therefore only test to a limited extent.
-If you encounter a problem, have a different model or are missing a feature: Just let me know in the community thread or open a [ticket](https://github.com/jnk-cons/e3dc-4-homey/issues) here.
+If you encounter a problem, have a different model or are missing a feature: Just let me know in the community thread or open a [ticket](https://github.com/Copiis/e3dc-4-homey/issues) here.
 I will do my best to help you find a solution.

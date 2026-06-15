@@ -28,4 +28,4 @@ And the best thing about it? The communication between the home power station an
 
 **Wallbox support**: Each connected wallbox appears as its own device with live power/solar-share. Use flow cards to start/stop charging, enable pure solar surplus (sun) mode, or set custom current + mode for advanced control.
 
-You can find a detailed documentation [here](https://jnk-cons.github.io/e3dc-4-homey/)
+You can find a detailed documentation [here](https://copiis.github.io/e3dc-4-homey/)
