@@ -1,0 +1,12 @@
+node_modules/
+.git/
+.idea/
+images_raw/
+raw_assets/
+doku/
+*.psd
+*.ai
+*.md
+*.txt
+homey-app.json
+# app.json wird vom Homey CLI während des Builds in .homeybuild/ generiert - nicht ignorieren!

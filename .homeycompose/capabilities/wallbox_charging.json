@@ -1,0 +1,21 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Charging allowed",
+    "de": "Laden freigegeben"
+  },
+  "titleTrue": {
+    "en": "Charging on",
+    "de": "Laden an"
+  },
+  "titleFalse": {
+    "en": "Charging off",
+    "de": "Laden aus"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "button",
+  "uiQuickAction": true,
+  "icon": "/assets/images/ev-station.svg",
+  "insights": false
+}

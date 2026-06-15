@@ -1,0 +1,21 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Sun mode",
+    "de": "Sonnenmodus"
+  },
+  "titleTrue": {
+    "en": "Sun mode on",
+    "de": "Sonnenmodus an"
+  },
+  "titleFalse": {
+    "en": "Sun mode off",
+    "de": "Sonnenmodus aus"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "button",
+  "uiQuickAction": true,
+  "icon": "/assets/images/ev-station-solar.svg",
+  "insights": false
+}

@@ -1,19 +1,56 @@
 {
   "name": {
-    "en": "E3DC Wallbox",
-    "de": "E3DC Wallbox"
+    "en": "Wallbox",
+    "de": "Wallbox"
   },
-  "class": "other",
+  "class": "evcharger",
   "capabilities": [
+    "measure_power",
+    "wallbox_charging",
+    "wallbox_sun_mode",
     "measure_wallbox_consumption",
     "measure_wallbox_solarshare"
   ],
+  "capabilitiesOptions": {
+    "wallbox_charging": {
+      "preventInsights": true,
+      "preventTag": true,
+      "titleTrue": {
+        "en": "Charging on",
+        "de": "Laden an"
+      },
+      "titleFalse": {
+        "en": "Charging off",
+        "de": "Laden aus"
+      }
+    },
+    "wallbox_sun_mode": {
+      "preventInsights": true,
+      "preventTag": true,
+      "titleTrue": {
+        "en": "Sun mode on",
+        "de": "Sonnenmodus an"
+      },
+      "titleFalse": {
+        "en": "Sun mode off",
+        "de": "Sonnenmodus aus"
+      }
+    }
+  },
+  "energy": {
+    "evCharger": true
+  },
   "platforms": [
     "local"
   ],
   "connectivity": [
     "lan"
   ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
   "pair": [
     {
       "id": "list_my_devices",
@@ -29,9 +66,5 @@
       "id": "add_my_devices",
       "template": "add_devices"
     }
-  ],
-  "images": {
-    "small": "/assets/images/small.png",
-    "large": "/assets/images/large.png"
-  }
+  ]
 }

@@ -4,6 +4,7 @@ import {
     ChargingLimits,
     DailySummaryConverter,
     DataBuilder,
+    DataType,
     DBTag,
     DefaultHomePowerPlantConnectionFactory,
     Duration,
@@ -31,16 +32,36 @@ import {
     DefaultWallboxService,
     RequestWallboxIdsCreator,
     WallboxDeviceIdsConverter,
-    WallboxPowerState,
     RSCPRequestResponseListener, RijndaelJsAESCipherFactory, DefaultSocketFactory, DefaultFrameParser
 } from 'easy-rscp';
 import {LiveData} from './model/live-data';
 import {SyncDataFrameConverter} from './converter/SyncDataFrameConverter';
+import {WallboxLiveState} from './model/wallbox-live-state';
+import {RequestWallboxLiveStateCreator} from './converter/request-wallbox-live-state-creator';
+import {WallboxLiveStateConverter} from './converter/wallbox-live-state-converter';
 import {SummaryData} from './model/summary-data';
 import {SummaryType} from './model/summary.config';
 import {Logger} from './internal-api/logger';
 import {BatteryData, DCBData} from './model/battery-data';
 import {LogRscpCommunicationListener} from './utils/log-rscp-communication-listener';
+import {
+    DEFAULT_WALLBOX_CURRENT_A,
+    WALLBOX_EXTERN_DATA_LEN,
+    WALLBOX_EXTERN_MIXED_MODE,
+    WALLBOX_EXTERN_SUN_MODE,
+    WALLBOX_MODE_MIXED,
+    WALLBOX_MODE_STOP
+} from './model/wallbox-control';
+import {
+    EMS_GET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+    EMS_GET_WB_DISCHARGE_BAT_UNTIL,
+    EMS_REQ_GET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+    EMS_REQ_GET_WB_DISCHARGE_BAT_UNTIL,
+    EMS_REQ_SET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+    EMS_REQ_SET_WB_DISCHARGE_BAT_UNTIL,
+    EMS_SET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+    EMS_SET_WB_DISCHARGE_BAT_UNTIL,
+} from './model/ems-wallbox-battery-tags';
 
 const connectionMap: Map<string, HomePowerPlantConnection> = new Map<string, HomePowerPlantConnection>()
 const connectionFactoryMap: Map<string, HomePowerPlantConnectionFactory> = new Map<string, HomePowerPlantConnectionFactory>()
@@ -537,7 +558,7 @@ export class RscpApi {
                         .then(value => {
                             log.log('readLiveData: Reading connected wallboxes -> Answer received. Reading live data')
                             if (value.length > 0) {
-                                wallboxService.readPowerState(value.map(info => info.id))
+                                this.readWallboxLiveState(con, value.map(info => info.id), log)
                                     .then(wbStates => {
                                         this.callLiveData(con, wbStates, allowReconnect, log)
                                             .then(data => resolve(data))
@@ -588,7 +609,34 @@ export class RscpApi {
         })
     }
 
-    private callLiveData(con: HomePowerPlantConnection, wbStates: WallboxPowerState[], allowReconnect: boolean, log: Logger): Promise<LiveData> {
+    private readWallboxLiveState(con: HomePowerPlantConnection, ids: number[], log: Logger): Promise<WallboxLiveState[]> {
+        return new Promise((resolve, reject) => {
+            if (ids.length === 0) {
+                reject(new Error('Parameter ids can not be empty'));
+                return;
+            }
+            const request = new RequestWallboxLiveStateCreator().create(ids);
+            log.log(`readWallboxLiveState: requesting EXTERN_DATA_ALG for ids [${ids.join(', ')}]`);
+            con.send(request)
+                .then(response => {
+                    try {
+                        const states = new WallboxLiveStateConverter().convert(response);
+                        states.forEach(state => {
+                            log.log(
+                                `readWallboxLiveState id=${state.id}: chargingEnabled=${state.chargingEnabled}, `
+                                + `sunMode=${state.sunModeActive}, powerW=${state.powerW}`
+                            );
+                        });
+                        resolve(states);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+                .catch(e => reject(e));
+        });
+    }
+
+    private callLiveData(con: HomePowerPlantConnection, wbStates: WallboxLiveState[], allowReconnect: boolean, log: Logger): Promise<LiveData> {
         return new Promise((resolve, reject) => {
             const request = new FrameBuilder()
                 .addData(
@@ -907,6 +955,505 @@ export class RscpApi {
         else {
             log.log('readConnectedWallboxes: Received error. Error: ' + causingError)
             log.log(causingError)
+            reject(causingError)
+        }
+    }
+
+    /**
+     * Send WBTag.REQ_SET_EXTERN control block (6 bytes).
+     * Byte layout (ioBroker e3dc-rscp): [sunMode, maxCurrentA, precharge, togglePhases, abortCharging, schuko]
+     */
+    setWallboxExtern(wallboxId: number, externBytes: number[], allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        if (externBytes.length !== WALLBOX_EXTERN_DATA_LEN) {
+            return Promise.reject(new Error(`Wallbox extern data must be ${WALLBOX_EXTERN_DATA_LEN} bytes`))
+        }
+        const hex = externBytes.map(b => b.toString(16).padStart(2, '0')).join('')
+        return new Promise<boolean>((resolve, reject) => {
+            log.log(`setWallboxExtern(id=${wallboxId}, data=${hex}): Requesting connection ...`)
+            this.getOpenConnection(log)
+                .then(con => {
+                    const request = new FrameBuilder()
+                        .addData(
+                            new DataBuilder().tag(WBTag.REQ_DATA).container(
+                                new DataBuilder().tag(WBTag.INDEX).uchar8(wallboxId).build(),
+                                new DataBuilder().tag(WBTag.REQ_SET_EXTERN).container(
+                                    new DataBuilder().tag(WBTag.EXTERN_DATA).type(DataType.BYTEARRAY).raw(hex).build(),
+                                    new DataBuilder().tag(WBTag.EXTERN_DATA_LEN).uchar8(WALLBOX_EXTERN_DATA_LEN).build()
+                                ).build()
+                            ).build()
+                        )
+                        .build()
+                    con.send(request)
+                        .then(_ => {
+                            log.log('setWallboxExtern: Answer received')
+                            resolve(true)
+                        })
+                        .catch(e => this.handleSetWallboxExternError(wallboxId, externBytes, allowReconnect, e, resolve, reject, log))
+                })
+                .catch(e => this.handleSetWallboxExternError(wallboxId, externBytes, allowReconnect, e, resolve, reject, log))
+        })
+    }
+
+    stopWallboxCharging(wallboxId: number, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        log.log(`stopWallboxCharging(id=${wallboxId})`)
+        return this.setWallboxExtern(wallboxId, [0, 0, 0, 0, 1, 0], allowReconnect, log)
+            .catch(reason => {
+                log.log('stopWallboxCharging: extern abort failed, trying REQ_SET_MODE stop')
+                log.log(reason)
+                return this.setWallboxMode(wallboxId, WALLBOX_MODE_STOP, 0, allowReconnect, log)
+            })
+    }
+
+    startWallboxCharging(wallboxId: number, maxCurrentA: number = DEFAULT_WALLBOX_CURRENT_A, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        log.log(`startWallboxCharging(id=${wallboxId}, maxA=${maxCurrentA})`)
+        const current = Math.max(6, Math.min(32, Math.round(maxCurrentA)))
+        return this.setWallboxExtern(wallboxId, [WALLBOX_EXTERN_MIXED_MODE, current, 0, 0, 0, 0], allowReconnect, log)
+            .then(() => this.setWallboxMode(wallboxId, WALLBOX_MODE_MIXED, current, false, log))
+    }
+
+    setWallboxSunMode(wallboxId: number, enabled: boolean, maxCurrentA: number = DEFAULT_WALLBOX_CURRENT_A, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        const sunByte = enabled ? WALLBOX_EXTERN_SUN_MODE : WALLBOX_EXTERN_MIXED_MODE
+        log.log(`setWallboxSunMode(id=${wallboxId}, enabled=${enabled})`)
+        // Byte 0 only for mode toggle (aligned with python-e3dc / ioBroker e3dc-rscp).
+        return this.setWallboxExtern(wallboxId, [sunByte, 0, 0, 0, 0, 0], allowReconnect, log)
+            .then(ok => {
+                if (!ok || !enabled || maxCurrentA === undefined || maxCurrentA === null) {
+                    return ok
+                }
+                const current = Math.max(6, Math.min(32, Math.round(maxCurrentA)))
+                log.log(`setWallboxSunMode: applying max current ${current}A`)
+                return this.setWallboxExtern(wallboxId, [0, current, 0, 0, 0, 0], false, log)
+            })
+    }
+
+    private handleSetWallboxExternError(
+        wallboxId: number,
+        externBytes: number[],
+        allowReconnect: boolean,
+        causingError: Error,
+        resolve: ((value: boolean | PromiseLike<boolean>) => void),
+        reject: ((reason?: any) => void),
+        log: Logger,
+    ) {
+        if (allowReconnect) {
+            log.log(`setWallboxExtern: Received error. Try to reconnect ... (Error: ${causingError})`)
+            const currentConnection = connectionMap.get(this.getKey())
+            this.closeConnection(currentConnection, log)
+                .finally(() => {
+                    this.setWallboxExtern(wallboxId, externBytes, false, log)
+                        .then(data => resolve(data))
+                        .catch(e => reject(e))
+                })
+        } else {
+            log.log('setWallboxExtern: Received error. Error: ' + causingError)
+            reject(causingError)
+        }
+    }
+
+    /**
+     * Set max charging current without changing the active mode (ioBroker PowerLimitation).
+     * EXTERN_DATA: [0, maxCurrentA, 0, 0, 0, 0]
+     */
+    setWallboxCurrentLimit(wallboxId: number, maxCurrentA: number, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        if (maxCurrentA === 0) {
+            return this.stopWallboxCharging(wallboxId, allowReconnect, log)
+        }
+        const current = Math.max(6, Math.min(32, Math.round(maxCurrentA)))
+        log.log(`setWallboxCurrentLimit(id=${wallboxId}, maxA=${current})`)
+        return this.setWallboxExtern(wallboxId, [0, current, 0, 0, 0, 0], allowReconnect, log)
+    }
+
+    /**
+     * Set wallbox charging mode and/or max current.
+     * Uses low-level WBTag.REQ_SET_MODE (supported by E3/DC wallboxes).
+     * mode: implementation specific (common: 0=off, 1=fast?, sun/external modes via EXTERN too).
+     * Consult your wallbox manual / test values. maxCurrentA: e.g. 6..32
+     */
+    setWallboxMode(wallboxId: number, mode: number, maxCurrentA: number, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            log.log(`setWallboxMode(id=${wallboxId}, mode=${mode}, maxA=${maxCurrentA}): Requesting connection ...`)
+            this.getOpenConnection(log)
+                .then(con => {
+                    log.log('setWallboxMode: Connection received')
+                    const request = new FrameBuilder()
+                        .addData(
+                            new DataBuilder().tag(WBTag.REQ_SET_MODE).container(
+                                new DataBuilder().tag(WBTag.INDEX).uchar8(wallboxId).build(),
+                                new DataBuilder().tag(WBTag.MODE_PARAM_MODE).uint16(mode).build(),
+                                new DataBuilder().tag(WBTag.MODE_PARAM_MAX_CURRENT).uint16(maxCurrentA).build()
+                            ).build()
+                        )
+                        .build()
+                    con.send(request)
+                        .then(response => {
+                            log.log('setWallboxMode: Answer received')
+                            // Response may be in SET_MODE or generic result. Treat non-error as success for now.
+                            resolve(true)
+                        })
+                        .catch(e => this.handleSetWallboxModeError(wallboxId, mode, maxCurrentA, allowReconnect, e, resolve, reject, log))
+                })
+                .catch(e => this.handleSetWallboxModeError(wallboxId, mode, maxCurrentA, allowReconnect, e, resolve, reject, log))
+        })
+    }
+
+    private handleSetWallboxModeError(
+        wallboxId: number,
+        mode: number,
+        maxCurrentA: number,
+        allowReconnect: boolean,
+        causingError: Error,
+        resolve: ((value: boolean | PromiseLike<boolean>) => void),
+        reject: ((reason?: any) => void),
+        log: Logger,
+    ) {
+        if (allowReconnect) {
+            log.log(`setWallboxMode: Received error. Try to reconnect ... (Error: ${causingError})`)
+            const currentConnection = connectionMap.get(this.getKey())
+            this.closeConnection(currentConnection, log)
+                .finally(() => {
+                    this.setWallboxMode(wallboxId, mode, maxCurrentA, false, log)
+                        .then(data => {
+                            log.log('setWallboxMode: Retry was successful')
+                            resolve(data)
+                        })
+                        .catch(e => {
+                            log.log('setWallboxMode: Retry failed also: ' + e)
+                            reject(e)
+                        })
+                })
+        } else {
+            log.log('setWallboxMode: Received error. Error: ' + causingError)
+            reject(causingError)
+        }
+    }
+
+    readBatteryToCarMode(allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        return this.emsReadUchar8AsBoolean(
+            EMSTag.REQ_BATTERY_TO_CAR_MODE,
+            EMSTag.BATTERY_TO_CAR_MODE,
+            'readBatteryToCarMode',
+            allowReconnect,
+            log,
+        )
+    }
+
+    setBatteryToCarMode(enabled: boolean, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        const value = enabled ? 1 : 0
+        log.log(`setBatteryToCarMode(enabled=${enabled})`)
+        if (enabled) {
+            return this.setBatteryBeforeCarMode(false, false, log)
+                .catch(() => false)
+                .then(() => this.emsSetUchar8(
+                    EMSTag.REQ_SET_BATTERY_TO_CAR_MODE,
+                    EMSTag.SET_BATTERY_TO_CAR_MODE,
+                    value,
+                    'setBatteryToCarMode',
+                    allowReconnect,
+                    log,
+                ))
+        }
+        return this.emsSetUchar8(
+            EMSTag.REQ_SET_BATTERY_TO_CAR_MODE,
+            EMSTag.SET_BATTERY_TO_CAR_MODE,
+            value,
+            'setBatteryToCarMode',
+            allowReconnect,
+            log,
+        )
+    }
+
+    readBatteryBeforeCarMode(allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        return this.emsReadUchar8AsBoolean(
+            EMSTag.REQ_BATTERY_BEFORE_CAR_MODE,
+            EMSTag.BATTERY_BEFORE_CAR_MODE,
+            'readBatteryBeforeCarMode',
+            allowReconnect,
+            log,
+        )
+    }
+
+    setBatteryBeforeCarMode(enabled: boolean, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        const value = enabled ? 1 : 0
+        log.log(`setBatteryBeforeCarMode(enabled=${enabled})`)
+        if (!enabled) {
+            return this.emsSetUchar8(
+                EMSTag.REQ_SET_BATTERY_BEFORE_CAR_MODE,
+                EMSTag.SET_BATTERY_BEFORE_CAR_MODE,
+                value,
+                'setBatteryBeforeCarMode',
+                allowReconnect,
+                log,
+            )
+        }
+        return this.setBatteryToCarMode(false, false, log)
+            .catch(() => false)
+            .then(() => this.emsSetUchar8(
+                EMSTag.REQ_SET_BATTERY_BEFORE_CAR_MODE,
+                EMSTag.SET_BATTERY_BEFORE_CAR_MODE,
+                value,
+                'setBatteryBeforeCarMode',
+                allowReconnect,
+                log,
+            ))
+    }
+
+    readWbDischargeBatteryUntil(allowReconnect: boolean = true, log: Logger): Promise<number> {
+        return this.emsReadUchar8(
+            EMS_REQ_GET_WB_DISCHARGE_BAT_UNTIL,
+            EMS_GET_WB_DISCHARGE_BAT_UNTIL,
+            'readWbDischargeBatteryUntil',
+            allowReconnect,
+            log,
+        )
+    }
+
+    setWbDischargeBatteryUntil(percent: number, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        const value = Math.max(0, Math.min(100, Math.round(percent)))
+        log.log(`setWbDischargeBatteryUntil(percent=${value})`)
+        return this.emsSetUchar8(
+            EMS_REQ_SET_WB_DISCHARGE_BAT_UNTIL,
+            EMS_SET_WB_DISCHARGE_BAT_UNTIL,
+            value,
+            'setWbDischargeBatteryUntil',
+            allowReconnect,
+            log,
+        ).then(setOk => {
+            if (setOk) {
+                return true
+            }
+            return this.readWbDischargeBatteryUntil(false, log)
+                .then(actual => {
+                    log.log(`setWbDischargeBatteryUntil: read-back ${actual}% (wanted ${value}%)`)
+                    return actual === value
+                })
+        })
+    }
+
+    readWallboxDisableBatteryAtMixMode(allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        return this.emsReadBoolean(
+            EMS_REQ_GET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+            EMS_GET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+            'readWallboxDisableBatteryAtMixMode',
+            allowReconnect,
+            log,
+        )
+    }
+
+    setWallboxDisableBatteryAtMixMode(enabled: boolean, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        log.log(`setWallboxDisableBatteryAtMixMode(enabled=${enabled})`)
+        return this.emsSetBoolean(
+            EMS_REQ_SET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+            EMS_SET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
+            enabled,
+            'setWallboxDisableBatteryAtMixMode',
+            allowReconnect,
+            log,
+        )
+    }
+
+    private emsSetUchar8(
+        reqTag: string,
+        rspTag: string,
+        value: number,
+        operationName: string,
+        allowReconnect: boolean,
+        log: Logger,
+    ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.getOpenConnection(log)
+                .then(con => {
+                    const request = new FrameBuilder()
+                        .addData(new DataBuilder().tag(reqTag).uchar8(value).build())
+                        .build()
+                    con.send(request)
+                        .then(response => {
+                            log.log(`${operationName}: answer received`)
+                            try {
+                                const result = response.numberByTag(rspTag)
+                                resolve(result === value)
+                            } catch {
+                                resolve(true)
+                            }
+                        })
+                        .catch(e => this.handleEmsRequestError(
+                            () => this.emsSetUchar8(reqTag, rspTag, value, operationName, false, log),
+                            operationName,
+                            allowReconnect,
+                            e,
+                            resolve,
+                            reject,
+                            log,
+                        ))
+                })
+                .catch(e => this.handleEmsRequestError(
+                    () => this.emsSetUchar8(reqTag, rspTag, value, operationName, false, log),
+                    operationName,
+                    allowReconnect,
+                    e,
+                    resolve,
+                    reject,
+                    log,
+                ))
+        })
+    }
+
+    private emsSetBoolean(
+        reqTag: string,
+        rspTag: string,
+        value: boolean,
+        operationName: string,
+        allowReconnect: boolean,
+        log: Logger,
+    ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.getOpenConnection(log)
+                .then(con => {
+                    const request = new FrameBuilder()
+                        .addData(new DataBuilder().tag(reqTag).boolean(value).build())
+                        .build()
+                    con.send(request)
+                        .then(response => {
+                            log.log(`${operationName}: answer received`)
+                            try {
+                                const result = response.booleanByTag(rspTag)
+                                resolve(result === value)
+                            } catch {
+                                resolve(true)
+                            }
+                        })
+                        .catch(e => this.handleEmsRequestError(
+                            () => this.emsSetBoolean(reqTag, rspTag, value, operationName, false, log),
+                            operationName,
+                            allowReconnect,
+                            e,
+                            resolve,
+                            reject,
+                            log,
+                        ))
+                })
+                .catch(e => this.handleEmsRequestError(
+                    () => this.emsSetBoolean(reqTag, rspTag, value, operationName, false, log),
+                    operationName,
+                    allowReconnect,
+                    e,
+                    resolve,
+                    reject,
+                    log,
+                ))
+        })
+    }
+
+    private emsReadUchar8(
+        reqTag: string,
+        rspTag: string,
+        operationName: string,
+        allowReconnect: boolean,
+        log: Logger,
+    ): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.getOpenConnection(log)
+                .then(con => {
+                    const request = new FrameBuilder()
+                        .addData(new DataBuilder().tag(reqTag).build())
+                        .build()
+                    con.send(request)
+                        .then(response => {
+                            log.log(`${operationName}: answer received`)
+                            resolve(response.numberByTag(rspTag))
+                        })
+                        .catch(e => this.handleEmsRequestError(
+                            () => this.emsReadUchar8(reqTag, rspTag, operationName, false, log),
+                            operationName,
+                            allowReconnect,
+                            e,
+                            resolve,
+                            reject,
+                            log,
+                        ))
+                })
+                .catch(e => this.handleEmsRequestError(
+                    () => this.emsReadUchar8(reqTag, rspTag, operationName, false, log),
+                    operationName,
+                    allowReconnect,
+                    e,
+                    resolve,
+                    reject,
+                    log,
+                ))
+        })
+    }
+
+    private emsReadUchar8AsBoolean(
+        reqTag: string,
+        rspTag: string,
+        operationName: string,
+        allowReconnect: boolean,
+        log: Logger,
+    ): Promise<boolean> {
+        return this.emsReadUchar8(reqTag, rspTag, operationName, allowReconnect, log)
+            .then(value => value >= 1)
+    }
+
+    private emsReadBoolean(
+        reqTag: string,
+        rspTag: string,
+        operationName: string,
+        allowReconnect: boolean,
+        log: Logger,
+    ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.getOpenConnection(log)
+                .then(con => {
+                    const request = new FrameBuilder()
+                        .addData(new DataBuilder().tag(reqTag).build())
+                        .build()
+                    con.send(request)
+                        .then(response => {
+                            log.log(`${operationName}: answer received`)
+                            resolve(response.booleanByTag(rspTag))
+                        })
+                        .catch(e => this.handleEmsRequestError(
+                            () => this.emsReadBoolean(reqTag, rspTag, operationName, false, log),
+                            operationName,
+                            allowReconnect,
+                            e,
+                            resolve,
+                            reject,
+                            log,
+                        ))
+                })
+                .catch(e => this.handleEmsRequestError(
+                    () => this.emsReadBoolean(reqTag, rspTag, operationName, false, log),
+                    operationName,
+                    allowReconnect,
+                    e,
+                    resolve,
+                    reject,
+                    log,
+                ))
+        })
+    }
+
+    private handleEmsRequestError<T>(
+        retry: () => Promise<T>,
+        operationName: string,
+        allowReconnect: boolean,
+        causingError: Error,
+        resolve: (value: T) => void,
+        reject: (reason?: any) => void,
+        log: Logger,
+    ) {
+        if (allowReconnect) {
+            log.log(`${operationName}: Received error. Try to reconnect ... (Error: ${causingError})`)
+            const currentConnection = connectionMap.get(this.getKey())
+            this.closeConnection(currentConnection, log)
+                .finally(() => {
+                    retry()
+                        .then(data => resolve(data))
+                        .catch(e => reject(e))
+                })
+        } else {
+            log.log(`${operationName}: Received error. Error: ${causingError}`)
             reject(causingError)
         }
     }

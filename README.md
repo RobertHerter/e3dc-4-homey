@@ -1,4 +1,11 @@
-# E3DC Home power station
+# E3DC Home power station (Community Fork)
+
+> **This is a community-maintained fork** of the original [jnk-cons/e3dc-4-homey](https://github.com/jnk-cons/e3dc-4-homey) which is no longer actively maintained.
+> Goal: keep the app working with current Homey, improve documentation, and **fully implement rich E3/DC Wallbox support** (more telemetry + control via RSCP for solar-optimized EV charging).
+
+Contributions, issues and PRs welcome on https://github.com/Copiis/e3dc-4-homey !
+
+---
 
 Do you own a home power station from E3DC? Would you like to integrate it into your SmartHome? Well,
 you've found what you're looking for.
@@ -18,5 +25,7 @@ And the best thing about it? The communication between the home power station an
 3. Seect "Profile"
 4. Scroll down and set a RSCP Password
 5. That's it
+
+**Wallbox support**: Each connected wallbox appears as its own device with live power/solar-share. Use flow cards to start/stop charging, enable pure solar surplus (sun) mode, or set custom current + mode for advanced control.
 
 You can find a detailed documentation [here](https://jnk-cons.github.io/e3dc-4-homey/)

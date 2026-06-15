@@ -1,0 +1,32 @@
+import {Wallbox} from '../../model/wallbox';
+import {isUnterbunden} from '../../utils/wallbox-e3dc-settings';
+import {RunListener} from '../run-listener';
+
+export class WallboxDisableBatteryMixModeActionCard implements RunListener {
+    run(args: any, state: any): Promise<any> {
+        return new Promise<any>(async (resolve, reject) => {
+            const wallbox: Wallbox = args.device;
+            const unterbunden = isUnterbunden(args.permission, args.enabled);
+
+            if (!wallbox || typeof wallbox.setDisableBatteryAtMixMode !== 'function') {
+                reject('Invalid wallbox device');
+                return;
+            }
+
+            wallbox.log && wallbox.log(
+                `Batterieentladung im Mischmodus: ${unterbunden ? 'Unterbunden' : 'Erlaubt'}`,
+            );
+            try {
+                const ok = await wallbox.setDisableBatteryAtMixMode(unterbunden);
+                if (ok) {
+                    resolve({ permission: unterbunden ? 'unterbunden' : 'erlaubt' });
+                } else {
+                    reject('E3/DC hat „Batterieentladung im Mischmodus“ abgelehnt');
+                }
+            } catch (e) {
+                wallbox.error && wallbox.error('Batterieentladung im Mischmodus failed: ' + e);
+                reject(e);
+            }
+        });
+    }
+}

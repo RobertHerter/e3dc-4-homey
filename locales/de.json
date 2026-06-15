@@ -89,7 +89,9 @@
     },
     "wallbox": {
       "consumption": "Wallbox Verbrauch",
-      "soloar-part": "Solaranteil"
+      "soloar-part": "Solaranteil",
+      "charging": "Laden freigegeben",
+      "sun-mode": "Sonnenmodus"
     },
     "settings": {
       "power-plant": "Hauskraftwerk",

@@ -87,7 +87,9 @@
     },
     "wallbox": {
       "consumption": "Wallbox consumption",
-      "soloar-part": "Solar share"
+      "soloar-part": "Solar share",
+      "charging": "Charging allowed",
+      "sun-mode": "Sun mode"
     },
     "settings": {
       "power-plant": "Power plant",

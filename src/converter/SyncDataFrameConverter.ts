@@ -4,13 +4,14 @@ import {
     Frame,
     FrameConverter,
     InfoTag,
-    ManualChargeStateConverter, WallboxPowerState
+    ManualChargeStateConverter
 } from 'easy-rscp';
 import {LiveData} from '../model/live-data';
+import {WallboxLiveState} from '../model/wallbox-live-state';
 
 export class SyncDataFrameConverter implements FrameConverter<LiveData> {
 
-    constructor(private wbLiveData: WallboxPowerState[], private sysSpecResponse: Frame) {
+    constructor(private wbLiveData: WallboxLiveState[], private sysSpecResponse: Frame) {
     }
 
     convert(frame: Frame): LiveData {

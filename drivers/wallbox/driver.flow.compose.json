@@ -1,0 +1,314 @@
+{
+  "actions": [
+    {
+      "id": "wallbox_start_charging",
+      "title": {
+        "de": "Wallbox Laden starten",
+        "en": "Start wallbox charging"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Laden starten (max. [[current]] A)",
+        "en": "[[device]] start charging (max. [[current]] A)"
+      },
+      "hint": {
+        "de": "Setzt die Wallbox in den Mischmodus und erlaubt das Laden (max. Stromstärke in Ampere). Standard 16 A. Das Fahrzeug muss angesteckt sein.",
+        "en": "Enables wallbox charging in mixed mode with the given max current (Amps). Default 16 A. The vehicle must be plugged in."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "number",
+          "name": "current",
+          "title": {
+            "de": "Max. Strom (A)",
+            "en": "Max current (A)"
+          },
+          "required": false,
+          "min": 6,
+          "max": 32,
+          "step": 1,
+          "value": 16
+        }
+      ]
+    },
+    {
+      "id": "wallbox_stop_charging",
+      "title": {
+        "de": "Wallbox Laden stoppen",
+        "en": "Stop wallbox charging"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Laden stoppen",
+        "en": "[[device]] stop charging"
+      },
+      "hint": {
+        "de": "Stoppt bzw. pausiert das Laden an der Wallbox (RSCP EXTERN_DATA Abort). Zum Fortsetzen die Karte „Laden starten“ verwenden.",
+        "en": "Stops or pauses charging at the wallbox (RSCP EXTERN_DATA abort). Use \"Start charging\" to resume."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        }
+      ]
+    },
+    {
+      "id": "wallbox_set_sun_mode",
+      "title": {
+        "de": "Wallbox Sonnenmodus ein/aus",
+        "en": "Set wallbox sun mode"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Sonnenmodus [[enabled]] (max. [[current]] A)",
+        "en": "[[device]] sun mode [[enabled]] (max. [[current]] A)"
+      },
+      "hint": {
+        "de": "Schaltet den PV-Überschuss-Modus (Sonnenmodus) der Wallbox ein oder aus. Im Sonnenmodus wird vorrangig Solarstrom genutzt.",
+        "en": "Enables or disables PV surplus (sun) mode on the wallbox. In sun mode, solar power is preferred."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "checkbox",
+          "name": "enabled",
+          "title": {
+            "de": "Sonnenmodus aktiv",
+            "en": "Sun mode enabled"
+          }
+        },
+        {
+          "type": "number",
+          "name": "current",
+          "title": {
+            "de": "Max. Strom (A)",
+            "en": "Max current (A)"
+          },
+          "required": false,
+          "min": 6,
+          "max": 32,
+          "step": 1,
+          "value": 16
+        }
+      ]
+    },
+    {
+      "id": "set_wallbox_current",
+      "title": {
+        "de": "Wallbox Lade Stromstärke setzen",
+        "en": "Set wallbox charging current"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Lade-Stromstärke auf [[current]] A setzen",
+        "en": "[[device]] set charge current to [[current]] A"
+      },
+      "hint": {
+        "de": "Ändert nur die maximale Stromstärke (6–32 A). Der aktive Modus (Misch- oder Sonnenmodus) bleibt unverändert. Zum Starten, Stoppen oder Moduswechsel die anderen Wallbox-Karten verwenden.",
+        "en": "Changes only the max charging current (6–32 A). The active mode stays unchanged. Use the other wallbox cards to start, stop, or switch mode."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "number",
+          "name": "current",
+          "title": {
+            "de": "Strom (A)",
+            "en": "Current (A)"
+          },
+          "required": true,
+          "min": 6,
+          "max": 32,
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "wallbox_battery_before_car",
+      "title": {
+        "de": "Ladepriorität (Nur im Sonnenmodus)",
+        "en": "Charging priority (sun mode only)"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Ladepriorität: [[priority]]",
+        "en": "[[device]] charging priority: [[priority]]"
+      },
+      "hint": {
+        "de": "Ladepriorisierung im Sonnenmodus: „Batterie zuerst“ oder „Wallbox zuerst“. Entspricht der E3/DC-Maske „Ladepriorisierung“.",
+        "en": "Charging priority in sun mode: battery first or wallbox first. Matches the E3/DC portal “Ladepriorisierung” page."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "dropdown",
+          "name": "priority",
+          "title": {
+            "de": "Ladepriorität",
+            "en": "Charging priority"
+          },
+          "values": [
+            {
+              "id": "batterie_zuerst",
+              "label": {
+                "de": "Batterie zuerst",
+                "en": "Battery first"
+              }
+            },
+            {
+              "id": "wallbox_zuerst",
+              "label": {
+                "de": "Wallbox zuerst",
+                "en": "Wallbox first"
+              }
+            }
+          ],
+          "value": "wallbox_zuerst"
+        }
+      ]
+    },
+    {
+      "id": "wallbox_battery_to_car",
+      "title": {
+        "de": "Batterieentladung im Sonnenmodus",
+        "en": "Battery discharge in sun mode"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Batterieentladung im Sonnenmodus: [[permission]]",
+        "en": "[[device]] battery discharge in sun mode: [[permission]]"
+      },
+      "hint": {
+        "de": "Batterieentladung durch Wallbox im Sonnenmodus: „Erlaubt“ oder „Unterbunden“. Systemweite E3/DC-Einstellung.",
+        "en": "Battery discharge via wallbox in sun mode: allowed or prevented. System-wide E3/DC setting."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "dropdown",
+          "name": "permission",
+          "title": {
+            "de": "Im Sonnenmodus",
+            "en": "In sun mode"
+          },
+          "values": [
+            {
+              "id": "erlaubt",
+              "label": {
+                "de": "Erlaubt",
+                "en": "Allowed"
+              }
+            },
+            {
+              "id": "unterbunden",
+              "label": {
+                "de": "Unterbunden",
+                "en": "Prevented"
+              }
+            }
+          ],
+          "value": "erlaubt"
+        }
+      ]
+    },
+    {
+      "id": "wallbox_discharge_battery_until",
+      "title": {
+        "de": "Batterie Entladegrenze",
+        "en": "Battery discharge limit"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Batterie Entladegrenze [[percent]] %",
+        "en": "[[device]] battery discharge limit [[percent]] %"
+      },
+      "hint": {
+        "de": "Legt fest, bis zu welchem Ladezustand (SOC in %) der Hausakku fürs Auto-Laden entladen werden darf. Entspricht E3/DC „Bis Ladezustand“.",
+        "en": "Sets how far (SOC in %) the home battery may be discharged for EV charging. Matches E3/DC “Down to state of charge”."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "number",
+          "name": "percent",
+          "title": {
+            "de": "Batterie Entladegrenze (%)",
+            "en": "Battery discharge limit (%)"
+          },
+          "required": true,
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "value": 90
+        }
+      ]
+    },
+    {
+      "id": "wallbox_disable_battery_mix_mode",
+      "title": {
+        "de": "Batterieentladung im Mischmodus",
+        "en": "Battery discharge in mixed mode"
+      },
+      "titleFormatted": {
+        "de": "[[device]] Batterieentladung im Mischmodus: [[permission]]",
+        "en": "[[device]] battery discharge in mixed mode: [[permission]]"
+      },
+      "hint": {
+        "de": "Batterieentladung durch Wallbox im Mischmodus und während Haltezeit und Zeitfunktion: „Erlaubt“ oder „Unterbunden“.",
+        "en": "Battery discharge via wallbox in mixed mode and during hold/time function: allowed or prevented."
+      },
+      "args": [
+        {
+          "type": "device",
+          "name": "device",
+          "filter": "driver_id=wallbox"
+        },
+        {
+          "type": "dropdown",
+          "name": "permission",
+          "title": {
+            "de": "Im Mischmodus und während Haltezeit und Zeitfunktion",
+            "en": "In mixed mode and during hold/time function"
+          },
+          "values": [
+            {
+              "id": "erlaubt",
+              "label": {
+                "de": "Erlaubt",
+                "en": "Allowed"
+              }
+            },
+            {
+              "id": "unterbunden",
+              "label": {
+                "de": "Unterbunden",
+                "en": "Prevented"
+              }
+            }
+          ],
+          "value": "unterbunden"
+        }
+      ]
+    }
+  ]
+}

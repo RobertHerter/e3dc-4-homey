@@ -1,6 +1,30 @@
 import {InternalDevice} from '../internal-api/internal-device';
-import {WallboxPowerState} from 'easy-rscp';
+import {WallboxLiveState} from './wallbox-live-state';
 
 export interface Wallbox extends InternalDevice{
-    sync(state: WallboxPowerState): void
+    sync(state: WallboxLiveState): void
+
+    /** Set max charging current (A) without changing the active mode. */
+    setCurrentLimit(maxCurrentA: number): Promise<boolean>
+
+    /** Resume / allow charging (mixed mode, clears abort flag). */
+    startCharging(maxCurrentA?: number): Promise<boolean>
+
+    /** Stop / pause charging. */
+    stopCharging(): Promise<boolean>
+
+    /** Enable PV surplus (sun) mode or switch to mixed/grid mode. */
+    setSunMode(enabled: boolean, maxCurrentA?: number): Promise<boolean>
+
+    /** Allow home battery discharge for EV charging (system-wide EMS setting). */
+    setBatteryToCar(enabled: boolean): Promise<boolean>
+
+    /** Prioritize EV charging before home battery (requires battery-to-car off). */
+    setBatteryBeforeCar(enabled: boolean): Promise<boolean>
+
+    /** Min. home battery SOC (%) for EV charging. */
+    setDischargeBatteryUntil(percent: number): Promise<boolean>
+
+    /** Block home battery use for EV in wallbox mixed mode. */
+    setDisableBatteryAtMixMode(enabled: boolean): Promise<boolean>
 }

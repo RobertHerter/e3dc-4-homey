@@ -64,6 +64,7 @@ import {IsIslandModePossibleConditionCard} from '../../src/cards/condition/is-is
 import {WallboxConfig} from '../../src/model/wallbox.config';
 import {Wallbox} from '../../src/model/wallbox';
 
+
 const SYNC_INTERVAL = 1000 * 20; // 20 sec
 const MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE = 5
 class HomePowerStationDevice extends Homey.Device implements HomePowerStation{

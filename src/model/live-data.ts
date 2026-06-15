@@ -1,4 +1,5 @@
-import {ChargingConfiguration, EmergencyPowerState, ManualChargeState, WallboxPowerState} from 'easy-rscp';
+import {ChargingConfiguration, EmergencyPowerState, ManualChargeState} from 'easy-rscp';
+import {WallboxLiveState} from './wallbox-live-state';
 
 export interface LiveData {
     pvDelivery: number
@@ -10,7 +11,7 @@ export interface LiveData {
     chargingConfig: ChargingConfiguration
     manualChargeState: ManualChargeState,
     emergencyPowerState: EmergencyPowerState,
-    wallboxPowerState: WallboxPowerState[],
+    wallboxPowerState: WallboxLiveState[],
     wallboxCompleteConsumption: number,
     wallboxCompleteConsumptionSolarShare: number,
     externalPowerConnected: boolean,
