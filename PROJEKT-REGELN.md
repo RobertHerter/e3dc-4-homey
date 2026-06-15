@@ -75,7 +75,7 @@ homey app publish
 ## Wallbox-UI (Homey)
 
 - Geräteklasse: `evcharger`.
-- **Kachel:** `wallbox_charging` und `wallbox_sun_mode` nur **Status** (`setable: false`, `uiComponent: sensor`) — Rücklesen vom HPS-Poll.
+- **Kachel:** `measure_power` (Leistung), `measure_wallbox_solarshare`, `wallbox_charging` und `wallbox_sun_mode` — letztere nur **Status** (`setable: false`, `uiComponent: sensor`); kein `measure_wallbox_consumption` am Wallbox-Gerät (nur am HPS für Summen).
 - **Steuerung:** Flow-DANN-Karten mit RSCP-Rücklesen — `wallbox_allow_charging`, `wallbox_block_charging`, `wallbox_sun_mode_on`, `wallbox_sun_mode_off`.
 - **Vorbedingung (WENN):** `wallbox_sun_mode_is_off` / `_is_active`, `wallbox_charging_is_blocked` / `_is_allowed` — liest Kachel-Sensor, damit Folgekarten (Benachrichtigung) nicht laufen wenn schon im Zustand.
 - **`evcharger_charging` nicht verwenden** — belegt die Haupt-EV-Ansicht.

@@ -4,8 +4,7 @@ You can set up an extra device for each connected wallbox and display the live p
 of the respective wallbox.
 
 **Current capabilities (per wallbox device):**
-- `measure_power` (W) – standard power, great for Homey Energy insights/dashboards
-- `measure_wallbox_consumption` (W)
+- `measure_power` (W) – charging power; standard for `evcharger` and Homey Energy
 - `measure_wallbox_solarshare` (W) – solar portion of the charging power
 - `wallbox_charging` (sensor) – charging allowed / stopped; mapped from RSCP `EXTERN_DATA_ALG` (read-only on device tile)
 - `wallbox_sun_mode` (sensor) – PV surplus mode; state from `EXTERN_DATA_ALG` status byte bit 7 (read-only on device tile)

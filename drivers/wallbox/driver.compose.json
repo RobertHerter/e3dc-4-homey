@@ -8,7 +8,6 @@
     "measure_power",
     "wallbox_charging",
     "wallbox_sun_mode",
-    "measure_wallbox_consumption",
     "measure_wallbox_solarshare"
   ],
   "capabilitiesOptions": {

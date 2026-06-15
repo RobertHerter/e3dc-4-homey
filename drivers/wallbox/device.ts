@@ -31,6 +31,9 @@ class WallboxDevice extends Homey.Device implements Wallbox {
     if (this.hasCapability('evcharger_charging_state')) {
       await this.removeCapability('evcharger_charging_state');
     }
+    if (this.hasCapability('measure_wallbox_consumption')) {
+      await this.removeCapability('measure_wallbox_consumption');
+    }
   }
 
   async onAdded() {
@@ -42,7 +45,6 @@ class WallboxDevice extends Homey.Device implements Wallbox {
     this.lastSyncedAt = Date.now();
 
     updateCapabilityValue('measure_power', state.powerW, this)
-    updateCapabilityValue('measure_wallbox_consumption', state.powerW, this)
     updateCapabilityValue('measure_wallbox_solarshare', state.solarPowerW, this)
     updateCapabilityValue('wallbox_charging', state.chargingEnabled, this)
     updateCapabilityValue('wallbox_sun_mode', state.sunModeActive, this)

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -399,7 +399,6 @@
         "measure_power",
         "wallbox_charging",
         "wallbox_sun_mode",
-        "measure_wallbox_consumption",
         "measure_wallbox_solarshare"
       ],
       "capabilitiesOptions": {
