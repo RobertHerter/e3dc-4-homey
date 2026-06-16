@@ -64,8 +64,6 @@ import {IsIslandModePossibleConditionCard} from '../../src/cards/condition/is-is
 import {WallboxConfig} from '../../src/model/wallbox.config';
 import {Wallbox} from '../../src/model/wallbox';
 import {formatError} from '../../src/utils/error-utils';
-import {DeviceDiagnostic, DiagnosticSnapshot} from '../../src/utils/device-diagnostic';
-import {ExportDiagnosticReportActionCard} from '../../src/cards/action/export-diagnostic-report.action.card';
 
 
 const SYNC_INTERVAL = 1000 * 20; // 20 sec
@@ -88,10 +86,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private api: RscpApi | undefined = undefined
   private syncErrorCount: number = 0
   private updateBatteryData = true
-  private readonly diagnostic = new DeviceDiagnostic()
-  private lastSyncAt?: Date
-  private lastSyncResult?: 'ok' | 'error'
-  private lastSnapshot: Partial<DiagnosticSnapshot> = {}
   async onInit() {
     this.log('HomePowerStationDevice has been initialized');
 
@@ -118,13 +112,9 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   }
 
   private doInit() {
-    this.diagnostic.info(`App ${this.getAppVersion()} — HKW initialisiert`)
     this.setupActionCards()
     this.setupConditionCards()
     this.setupTriggerCards()
-    this.publishDiagnosticReport().catch(reason => {
-      this.error('Initial diagnostic report failed: ' + formatError(reason))
-    })
 
     setTimeout(() => {
       this.autoSync()
@@ -272,12 +262,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     this.setupStopManualChargeCards()
     this.setupConfigureEmergencyPowerReserve()
     this.setupRemoveEmergencyPowerReserve()
-    this.setupExportDiagnosticReportCard()
-  }
-
-  private setupExportDiagnosticReportCard() {
-    const card = this.homey.flow.getActionCard('export_diagnostic_report')
-    card.registerRunListener(new ExportDiagnosticReportActionCard().run)
   }
 
   private setupRemoveEmergencyPowerReserve() {
@@ -365,10 +349,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
           this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL)
         })
         .catch(reason => {
-          const message = formatError(reason)
-          this.error('Auto sync failed: ' + message)
-          this.diagnostic.error('Auto-Sync: ' + message)
-          this.publishDiagnosticReport().catch(() => undefined)
+          this.error('Auto sync failed: ' + formatError(reason))
           this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL)
         })
   }
@@ -453,20 +434,14 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
               this.handleEmergencyPowerStateChanges(result)
               this.handleWallbox(result)
               this.handleAvailability();
-              this.recordSyncSuccess(result)
-              this.publishDiagnosticReport().catch(() => undefined)
               this.handleBatteryData(station, result, resolve);
             } catch (e) {
               this.error('Error processing live data: ' + formatError(e))
-              this.recordSyncFailure('Verarbeitung Live-Daten / processing live data: ' + formatError(e))
-              this.publishDiagnosticReport().catch(() => undefined)
               resolve(undefined)
             }
           })
           .catch(e => {
             this.error('Error reading live data: ' + formatError(e))
-            this.recordSyncFailure('RSCP Live-Daten / live data: ' + formatError(e))
-            this.publishDiagnosticReport().catch(() => undefined)
             this.syncErrorCount++
             if (this.syncErrorCount >= MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE) {
               this.setUnavailable(this.homey.__('messages.hps-not-available')).then()
@@ -685,71 +660,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     await this.unsetStoreValue('settings')
   }
 
-
-  async buildDiagnosticReport(): Promise<string> {
-    await this.publishDiagnosticReport()
-    return this.diagnostic.formatReport(this.createDiagnosticSnapshot())
-  }
-
-  private getAppVersion(): string {
-    return this.homey.manifest?.version ?? 'unknown'
-  }
-
-  private createDiagnosticSnapshot(): DiagnosticSnapshot {
-    const homeyVersion = (this.homey as { version?: string }).version
-    return {
-      appVersion: this.getAppVersion(),
-      deviceName: this.getName(),
-      deviceId: this.getId(),
-      homeyVersion,
-      available: this.getAvailable(),
-      syncErrorCount: this.syncErrorCount,
-      lastSyncAt: this.lastSyncAt,
-      lastSyncResult: this.lastSyncResult,
-      pvW: this.lastSnapshot.pvW,
-      houseW: this.lastSnapshot.houseW,
-      gridW: this.lastSnapshot.gridW,
-      batteryPct: this.lastSnapshot.batteryPct,
-      wallboxDeviceCount: this.countLinkedDevices('wallbox'),
-      batteryDeviceCount: this.countLinkedDevices('battery-module'),
-      firmware: this.lastSnapshot.firmware,
-    }
-  }
-
-  private async publishDiagnosticReport(): Promise<void> {
-    const report = this.diagnostic.formatReport(this.createDiagnosticSnapshot())
-    updateCapabilityValue('diagnostic_report', report, this)
-    await this.setSettings({ diagnosticReport: report })
-  }
-
-  private recordSyncSuccess(result: LiveData): void {
-    this.lastSyncAt = new Date()
-    this.lastSyncResult = 'ok'
-    this.lastSnapshot = {
-      pvW: result.pvDelivery,
-      houseW: result.houseConsumption,
-      gridW: result.gridDelivery,
-      batteryPct: result.batteryChargingLevel * 100,
-      firmware: result.firmwareVersion,
-    }
-    this.diagnostic.info('Sync OK')
-  }
-
-  private recordSyncFailure(message: string): void {
-    this.lastSyncAt = new Date()
-    this.lastSyncResult = 'error'
-    this.diagnostic.error(message)
-  }
-
-  private countLinkedDevices(driverId: string): number {
-    const stationId = this.getId()
-    return this.homey.drivers.getDriver(driverId).getDevices()
-        .filter(device => {
-          const settings = device.getStoreValue('settings') as { stationId?: string } | undefined
-          return settings?.stationId === stationId
-        })
-        .length
-  }
 
   async onSettings({
     oldSettings,

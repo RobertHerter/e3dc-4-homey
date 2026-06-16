@@ -161,5 +161,27 @@
         }
       }
     ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Diagnosis (support)",
+      "de": "Diagnose (Support)"
+    },
+    "children": [
+      {
+        "id": "diagnosticReport",
+        "type": "label",
+        "label": {
+          "en": "Diagnostic report (copy for forum)",
+          "de": "Diagnosebericht (für Forum kopieren)"
+        },
+        "value": "(wird nach dem ersten Sync erstellt / created after first sync)",
+        "hint": {
+          "en": "Updated automatically every sync. Copy this text for support requests. Or use the flow card “Create diagnostic report” and send the token via notification.",
+          "de": "Wird bei jedem Sync aktualisiert. Text für Support-Anfragen kopieren. Oder Flow-Karte „Diagnosebericht erstellen“ und Token per Benachrichtigung senden."
+        }
+      }
+    ]
   }
 ]

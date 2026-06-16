@@ -11,4 +11,5 @@ export interface HomePowerStation extends InternalDevice{
     getManualChargeState(): ManualChargeState | null
     getCurrentSOC(): number
     getEmergencyPowerState(): EmergencyPowerState | null
+    buildDiagnosticReport(): Promise<string>
 }

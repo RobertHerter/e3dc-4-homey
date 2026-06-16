@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -128,7 +128,8 @@
         "measure_house_consumption",
         "measure_battery",
         "firmware_version",
-        "charge_time"
+        "charge_time",
+        "diagnostic_report"
       ],
       "platforms": [
         "local"
@@ -147,6 +148,10 @@
             "en": "PV power",
             "de": "PV Leistung"
           }
+        },
+        "diagnostic_report": {
+          "preventInsights": true,
+          "preventTag": true
         }
       },
       "energy": {
@@ -338,6 +343,28 @@
               "hint": {
                 "en": "If activated, more information is written to the Homey log. Only activate the switch when prompted if you have reported a problem yourself.",
                 "de": "Wenn aktiviert, werden mehr Informationen in das Log von Homey geschrieben. Aktiviert den Schalter nur nach Aufforderung, wenn ihr selbst ein Problem gemeldet habt."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Diagnosis (support)",
+            "de": "Diagnose (Support)"
+          },
+          "children": [
+            {
+              "id": "diagnosticReport",
+              "type": "label",
+              "label": {
+                "en": "Diagnostic report (copy for forum)",
+                "de": "Diagnosebericht (für Forum kopieren)"
+              },
+              "value": "(wird nach dem ersten Sync erstellt / created after first sync)",
+              "hint": {
+                "en": "Updated automatically every sync. Copy this text for support requests. Or use the flow card “Create diagnostic report” and send the token via notification.",
+                "de": "Wird bei jedem Sync aktualisiert. Text für Support-Anfragen kopieren. Oder Flow-Karte „Diagnosebericht erstellen“ und Token per Benachrichtigung senden."
               }
             }
           ]
@@ -1355,6 +1382,34 @@
         ]
       },
       {
+        "id": "export_diagnostic_report",
+        "title": {
+          "de": "Diagnosebericht erstellen",
+          "en": "Create diagnostic report"
+        },
+        "hint": {
+          "de": "Aktualisiert den Diagnosebericht (auch unter HKW-Einstellungen → Diagnose) und stellt ihn als Token bereit — z. B. für eine Benachrichtigung im Forum.",
+          "en": "Refreshes the diagnostic report (also under HPS settings → Diagnosis) and exposes it as a token, e.g. for a support notification."
+        },
+        "tokens": [
+          {
+            "name": "diagnostic report",
+            "type": "string",
+            "title": {
+              "de": "Diagnosebericht",
+              "en": "Diagnostic report"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=home-power-station"
+          }
+        ]
+      },
+      {
         "id": "activate_configured_power_limits",
         "title": {
           "de": "Aktiviere die aktuell am Hauskraftwerk eingestellten Lade-/Entladelimits",
@@ -2258,6 +2313,18 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/images/badge.svg",
+      "insights": false
+    },
+    "diagnostic_report": {
+      "type": "string",
+      "title": {
+        "en": "Diagnostic report",
+        "de": "Diagnosebericht"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/info.svg",
       "insights": false
     },
     "external_power_delivery_connected": {

@@ -12,7 +12,8 @@
     "measure_house_consumption",
     "measure_battery",
     "firmware_version",
-    "charge_time"
+    "charge_time",
+    "diagnostic_report"
   ],
   "platforms": [
     "local"
@@ -31,6 +32,10 @@
         "en": "PV power",
         "de": "PV Leistung"
       }
+    },
+    "diagnostic_report": {
+      "preventInsights": true,
+      "preventTag": true
     }
   },
   "energy": {

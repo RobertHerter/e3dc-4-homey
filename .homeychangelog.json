@@ -1,4 +1,8 @@
 {
+  "1.4.12": {
+    "de": "- Diagnose-Export für Support: HKW-Einstellungen → „Diagnose (Support)“ + Flow-Karte „Diagnosebericht erstellen“ (Token für Benachrichtigung)\n- Keine Passwörter im Bericht; letzte Sync-Ereignisse und Live-Werte",
+    "en": "- Diagnostic export for support: HPS settings → “Diagnosis (support)” + flow card “Create diagnostic report” (token for notifications)\n- No passwords in report; recent sync events and live values"
+  },
   "1.4.11": {
     "de": "- Homey Energy (ab 12.4.5): HKW liefert wieder `measure_power` (= PV) für Solar/Leistungs-Kachel\n- Batteriemonitor: Geräteklasse `battery` + `homeBattery` + Lade-/Entladeleistung\n- Legacy-Wallbox-Sensoren am HKW entfernt (eigene Wallbox-Geräte); Flow-Trigger robuster registriert",
     "en": "- Homey Energy (12.4.5+): HPS exposes `measure_power` (= PV) for solar/main power tile\n- Battery monitor: `battery` class + `homeBattery` + charge/discharge power\n- Removed legacy wallbox sensors on HPS (use wallbox devices); more robust flow trigger registration"
