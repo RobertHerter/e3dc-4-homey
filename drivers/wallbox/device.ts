@@ -12,6 +12,8 @@ import {
   isSunModeAlreadyInactive,
 } from '../../src/utils/wallbox-command-guard';
 import {formatError} from '../../src/utils/error-utils';
+import {wallboxTotalEnergyKwh} from '../../src/utils/energy-meter-integrator';
+import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
 
 const SYNC_CACHE_MAX_AGE_MS = 30_000;
 
@@ -26,6 +28,7 @@ class WallboxDevice extends Homey.Device implements Wallbox {
   }
 
   private async migrateCapabilities(): Promise<void> {
+    await ensureCapabilities(this, ['meter_power'])
     const legacyCapabilities = [
       'evcharger_charging',
       'evcharger_charging_state',
@@ -53,6 +56,10 @@ class WallboxDevice extends Homey.Device implements Wallbox {
     this.lastSyncedAt = Date.now();
 
     updateCapabilityValue('measure_power', state.powerW, this)
+    const meterKwh = wallboxTotalEnergyKwh(state.totalEnergyWh, this)
+    if (meterKwh !== undefined) {
+      updateCapabilityValue('meter_power', meterKwh, this)
+    }
     updateCapabilityValue('measure_wallbox_solarshare', state.solarPowerW, this)
     updateCapabilityValue('wallbox_charging', state.chargingEnabled, this)
     updateCapabilityValue('wallbox_sun_mode', state.sunModeActive, this)

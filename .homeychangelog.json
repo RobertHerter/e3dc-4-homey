@@ -1,4 +1,8 @@
 {
+  "1.4.16": {
+    "de": "- Homey Energy: kWh-Werte via `meter_power` — HKW/Akku integrieren Leistung, Wallbox nutzt RSCP-Gesamtenergie\n- Bestehende Geräte erhalten `meter_power` automatisch beim App-Start",
+    "en": "- Homey Energy: kWh via `meter_power` — HPS/battery integrate power, wallbox uses RSCP total energy\n- Existing devices auto-gain `meter_power` on app start"
+  },
   "1.4.15": {
     "de": "- HKW-Kachel: doppelte „PV Leistung“ entfernt (Legacy-Capability `measure_pv_delivery` weg, nur noch `measure_power` für Homey Energy)",
     "en": "- HPS tile: removed duplicate “PV power” (legacy `measure_pv_delivery` dropped; `measure_power` only for Homey Energy)"

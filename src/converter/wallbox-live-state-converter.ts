@@ -32,6 +32,7 @@ export class WallboxLiveStateConverter implements FrameConverter<WallboxLiveStat
                     result.push({
                         id: index,
                         powerW: all.powerW,
+                        totalEnergyWh: all.totalEnergyWh,
                         solarPowerW: sun.powerW,
                         socPercent: alg?.socPercent,
                         activePhases: alg?.activePhases,

@@ -6,6 +6,7 @@
   "class": "solarpanel",
   "capabilities": [
     "measure_power",
+    "meter_power",
     "measure_grid_delivery",
     "measure_battery_delivery",
     "measure_house_consumption",
@@ -40,7 +41,8 @@
   "energy": {
     "batteries": [
       "INTERNAL"
-    ]
+    ],
+    "meterPowerExportedCapability": "meter_power"
   },
   "pair": [
     {

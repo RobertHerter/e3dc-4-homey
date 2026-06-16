@@ -66,6 +66,8 @@ import {Wallbox} from '../../src/model/wallbox';
 import {formatError} from '../../src/utils/error-utils';
 import {DeviceDiagnostic, DiagnosticSnapshot} from '../../src/utils/device-diagnostic';
 import {ExportDiagnosticReportActionCard} from '../../src/cards/action/export-diagnostic-report.action.card';
+import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
+import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
 
 
 const SYNC_INTERVAL = 1000 * 20; // 20 sec
@@ -95,6 +97,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private lastSyncAt?: Date
   private lastSyncResult?: 'ok' | 'error'
   private lastSnapshot: Partial<DiagnosticSnapshot> = {}
+  private readonly energyMeter = new EnergyMeterIntegrator(this)
   async onInit() {
     this.log('HomePowerStationDevice has been initialized');
 
@@ -121,6 +124,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   }
 
   private async migrateLegacyCapabilities(): Promise<void> {
+    await ensureCapabilities(this, ['meter_power'])
     const legacyCapabilities = ['measure_pv_delivery']
     for (const capability of legacyCapabilities) {
       if (!this.hasCapability(capability)) {
@@ -469,6 +473,8 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
           .then(result => {
             try {
               updateCapabilityValue('measure_power', result.pvDelivery, this)
+              const generatedKwh = this.energyMeter.integrateGeneration(result.pvDelivery)
+              updateCapabilityValue('meter_power', generatedKwh, this)
               const gridDeliveryChange = updateCapabilityValue('measure_grid_delivery', result.gridDelivery, this)
               const batteryDeliveryChange = updateCapabilityValue('measure_battery_delivery', result.batteryDelivery * -1, this)
               const houseConsumptionChange = updateCapabilityValue('measure_house_consumption', result.houseConsumption, this)

@@ -6,6 +6,7 @@
   "class": "evcharger",
   "capabilities": [
     "measure_power",
+    "meter_power",
     "wallbox_charging",
     "wallbox_sun_mode",
     "measure_wallbox_solarshare"
@@ -21,7 +22,8 @@
     }
   },
   "energy": {
-    "evCharger": true
+    "evCharger": true,
+    "meterPowerImportedCapability": "meter_power"
   },
   "platforms": [
     "local"

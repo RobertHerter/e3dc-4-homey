@@ -6,6 +6,8 @@
   "class": "battery",
   "capabilities": [
     "measure_power",
+    "meter_power.charged",
+    "meter_power.discharged",
     "device_name",
     "measure_dcbcount",
     "measure_battery",
@@ -30,7 +32,9 @@
     "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
   },
   "energy": {
-    "homeBattery": true
+    "homeBattery": true,
+    "meterPowerImportedCapability": "meter_power.charged",
+    "meterPowerExportedCapability": "meter_power.discharged"
   },
   "pair": [
     {

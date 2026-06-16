@@ -3,11 +3,16 @@ import {BatteryData} from '../../src/model/battery-data';
 import {updateCapabilityValue} from '../../src/utils/capability-utils';
 import {BatteryModule} from '../../src/model/battery-module';
 import {ChargingConfiguration, EmergencyPowerState} from 'easy-rscp';
+import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
+import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
 
 class BatterModuleDevice extends Homey.Device implements BatteryModule{
 
+  private readonly energyMeter = new EnergyMeterIntegrator(this)
+
   async onInit() {
     this.log('BatterModuleDevice has been initialized');
+    await ensureCapabilities(this, ['meter_power.charged', 'meter_power.discharged'])
   }
 
   async onAdded() {
@@ -17,6 +22,9 @@ class BatterModuleDevice extends Homey.Device implements BatteryModule{
   syncLive(rsoc: number, batteryPowerW: number,
       chargingConfiguration: ChargingConfiguration, emergencyPower: EmergencyPowerState) {
     updateCapabilityValue('measure_power', batteryPowerW, this)
+    const meter = this.energyMeter.integrateBattery(batteryPowerW)
+    updateCapabilityValue('meter_power.charged', meter.chargedKwh, this)
+    updateCapabilityValue('meter_power.discharged', meter.dischargedKwh, this)
     updateCapabilityValue('measure_battery', rsoc, this)
     this.updatePowerLimits(chargingConfiguration, emergencyPower)
   }
