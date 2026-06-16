@@ -20,6 +20,28 @@
     "measure_max_discharging_power",
     "measure_emergency_power_reserve"
   ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": {
+        "en": "Battery power",
+        "de": "Akkuleistung"
+      }
+    },
+    "meter_power.charged": {
+      "title": {
+        "en": "Battery charged (total)",
+        "de": "Akku-Ladung (gesamt)"
+      },
+      "icon": "/assets/images/battery-load.svg"
+    },
+    "meter_power.discharged": {
+      "title": {
+        "en": "Battery discharged (total)",
+        "de": "Akku-Entladung (gesamt)"
+      },
+      "icon": "/assets/images/battery-unload.svg"
+    }
+  },
   "platforms": [
     "local"
   ],

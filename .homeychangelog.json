@@ -1,4 +1,8 @@
 {
+  "1.5.2": {
+    "de": "- Akku-Kachel: Ladung und Entladung unterscheidbar benannt (Akku-Ladung / Akku-Entladung, eigene Icons)",
+    "en": "- Battery tile: distinct labels for charged vs discharged energy (with icons)"
+  },
   "1.5.1": {
     "de": "- Netz-Kachel: Bezug und Einspeisung unterscheidbar benannt (Netzbezug / Netzeinspeisung, eigene Icons)",
     "en": "- Grid meter tile: distinct labels for import vs export (with icons)"
