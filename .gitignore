@@ -2,3 +2,6 @@
 /node_modules/
 /.homeybuild/
 /doku/site/
+
+# Lokale Projekt-Notizen (nicht ins Repo)
+/PROJEKT-REGELN.md
