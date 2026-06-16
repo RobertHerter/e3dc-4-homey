@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -129,6 +129,28 @@
         "meter_power.imported",
         "meter_power.exported"
       ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Grid power",
+            "de": "Netzleistung"
+          }
+        },
+        "meter_power.imported": {
+          "title": {
+            "en": "Grid import (total)",
+            "de": "Netzbezug (gesamt)"
+          },
+          "icon": "/assets/images/grid-receive.svg"
+        },
+        "meter_power.exported": {
+          "title": {
+            "en": "Grid export (total)",
+            "de": "Netzeinspeisung (gesamt)"
+          },
+          "icon": "/assets/images/grid-feedin.svg"
+        }
+      },
       "energy": {
         "meterPowerImportedCapability": "meter_power.imported",
         "meterPowerExportedCapability": "meter_power.exported"

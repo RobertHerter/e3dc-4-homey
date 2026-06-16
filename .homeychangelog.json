@@ -1,4 +1,8 @@
 {
+  "1.5.1": {
+    "de": "- Netz-Kachel: Bezug und Einspeisung unterscheidbar benannt (Netzbezug / Netzeinspeisung, eigene Icons)",
+    "en": "- Grid meter tile: distinct labels for import vs export (with icons)"
+  },
   "1.5.0": {
     "de": "- Neues Gerät **Netz** für Homey Energy (Bezug/Einspeisung): `meter_power.imported` / `.exported`\n- Nach Pairing pro HKW: Geräte → E3DC → Netz hinzufügen",
     "en": "- New **Grid meter** device for Homey Energy (import/export): `meter_power.imported` / `.exported`\n- Pair per HPS: Devices → E3DC → Grid meter"

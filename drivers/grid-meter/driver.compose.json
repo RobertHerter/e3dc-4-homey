@@ -9,6 +9,28 @@
     "meter_power.imported",
     "meter_power.exported"
   ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": {
+        "en": "Grid power",
+        "de": "Netzleistung"
+      }
+    },
+    "meter_power.imported": {
+      "title": {
+        "en": "Grid import (total)",
+        "de": "Netzbezug (gesamt)"
+      },
+      "icon": "/assets/images/grid-receive.svg"
+    },
+    "meter_power.exported": {
+      "title": {
+        "en": "Grid export (total)",
+        "de": "Netzeinspeisung (gesamt)"
+      },
+      "icon": "/assets/images/grid-feedin.svg"
+    }
+  },
   "energy": {
     "meterPowerImportedCapability": "meter_power.imported",
     "meterPowerExportedCapability": "meter_power.exported"
