@@ -1,4 +1,8 @@
 {
+  "1.4.13": {
+    "de": "- Homey Energy: Batteriemonitor aktualisiert `measure_power` jetzt bei jedem Live-Sync (nicht nur alle 40 s) — Batterie sollte nicht mehr „inaktiv“ sein\n- Flow WENN: eigene Trigger für Hausverbrauch, Batterieleistung und Netzleistung (Custom-Capabilities haben keine System-„changed“-Karten)\n- Smartmeter-Gerät: im Original-Repo nicht vorhanden — geplant für eine spätere Version (Homey Energy Bezug/Einspeisung)",
+    "en": "- Homey Energy: battery monitor now updates `measure_power` on every live sync (not only every 40s) — battery should no longer show as inactive\n- Flow WHEN: dedicated triggers for house consumption, battery power and grid power (custom capabilities lack system “changed” cards)\n- Smart meter device: not in original repo — planned for a later release (Homey Energy import/export)"
+  },
   "1.4.12": {
     "de": "- Diagnose-Export für Support: HKW-Einstellungen → „Diagnose (Support)“ + Flow-Karte „Diagnosebericht erstellen“ (Token für Benachrichtigung)\n- Keine Passwörter im Bericht; letzte Sync-Ereignisse und Live-Werte",
     "en": "- Diagnostic export for support: HPS settings → “Diagnosis (support)” + flow card “Create diagnostic report” (token for notifications)\n- No passwords in report; recent sync events and live values"

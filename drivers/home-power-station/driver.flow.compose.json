@@ -656,6 +656,93 @@
           }
         }
       ]
+    },
+    {
+      "id": "house_consumption_has_changed",
+      "title": {
+        "de": "Hausverbrauch wurde geändert",
+        "en": "House consumption has changed"
+      },
+      "hint": {
+        "de": "Wird ausgelöst, sobald sich der Hausverbrauch geändert hat",
+        "en": "Is triggered as soon as house consumption has changed"
+      },
+      "tokens": [
+        {
+          "name": "old",
+          "type": "number",
+          "title": {
+            "de": "Alter Hausverbrauch (W)",
+            "en": "Old house consumption (W)"
+          }
+        },
+        {
+          "name": "new",
+          "type": "number",
+          "title": {
+            "de": "Neuer Hausverbrauch (W)",
+            "en": "New house consumption (W)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "battery_power_has_changed",
+      "title": {
+        "de": "Batterieleistung wurde geändert",
+        "en": "Battery power has changed"
+      },
+      "hint": {
+        "de": "Wird ausgelöst, sobald sich die Batterieleistung geändert hat (positiv = Entladen, negativ = Laden)",
+        "en": "Is triggered as soon as battery power has changed (positive = discharging, negative = charging)"
+      },
+      "tokens": [
+        {
+          "name": "old",
+          "type": "number",
+          "title": {
+            "de": "Alte Batterieleistung (W)",
+            "en": "Old battery power (W)"
+          }
+        },
+        {
+          "name": "new",
+          "type": "number",
+          "title": {
+            "de": "Neue Batterieleistung (W)",
+            "en": "New battery power (W)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "grid_power_has_changed",
+      "title": {
+        "de": "Netzleistung wurde geändert",
+        "en": "Grid power has changed"
+      },
+      "hint": {
+        "de": "Wird ausgelöst, sobald sich die Netzleistung geändert hat (positiv = Einspeisung, negativ = Bezug)",
+        "en": "Is triggered as soon as grid power has changed (positive = feed-in, negative = import)"
+      },
+      "tokens": [
+        {
+          "name": "old",
+          "type": "number",
+          "title": {
+            "de": "Alte Netzleistung (W)",
+            "en": "Old grid power (W)"
+          }
+        },
+        {
+          "name": "new",
+          "type": "number",
+          "title": {
+            "de": "Neue Netzleistung (W)",
+            "en": "New grid power (W)"
+          }
+        }
+      ]
     }
   ],
   "conditions": [

@@ -75,9 +75,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private maxChargingLimitHasChangedTrigger: SimpleValueChangedTrigger<number> | null = null
   private maxDischargingLimitHasChangedTrigger: SimpleValueChangedTrigger<number> | null = null
   private emergencyPowerReserveChangedTrigger: SimpleValueChangedTrigger<number> | null = null
-  private houseConsumptionHasChangedTrigger: SimpleValueChangedTrigger<number> | null = null
-  private batteryPowerHasChangedTrigger: SimpleValueChangedTrigger<number> | null = null
-  private gridPowerHasChangedTrigger: SimpleValueChangedTrigger<number> | null = null
   private manualBatteryChargingStartedTrigger: TriggerCard<undefined> | null = null
   private manualBatteryChargingStoppedTrigger: TriggerCard<number> | null = null
   private islandModeStartedTrigger: TriggerCard<undefined> | null = null
@@ -162,9 +159,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       { name: 'manual_battery_charging_stopped', run: () => this.setupManualBatteryChargingStoppedCard() },
       { name: 'island_mode', run: () => this.setupIslandModeCards() },
       { name: 'emergency_power_reserve_has_changed', run: () => this.setupEmergencyPowerReserveChangedCard() },
-      { name: 'house_consumption_has_changed', run: () => this.setupHouseConsumptionChangedCard() },
-      { name: 'battery_power_has_changed', run: () => this.setupBatteryPowerChangedCard() },
-      { name: 'grid_power_has_changed', run: () => this.setupGridPowerChangedCard() },
     ]
     steps.forEach(step => {
       try {
@@ -212,21 +206,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private setupEmergencyPowerReserveChangedCard() {
     const card = this.homey.flow.getDeviceTriggerCard('emergency_power_reserve_has_changed')
     this.emergencyPowerReserveChangedTrigger = new SimpleValueChangedTrigger<number>('Emergency power reserve', this, card, this)
-  }
-
-  private setupHouseConsumptionChangedCard() {
-    const card = this.homey.flow.getDeviceTriggerCard('house_consumption_has_changed')
-    this.houseConsumptionHasChangedTrigger = new SimpleValueChangedTrigger<number>('House consumption', this, card, this)
-  }
-
-  private setupBatteryPowerChangedCard() {
-    const card = this.homey.flow.getDeviceTriggerCard('battery_power_has_changed')
-    this.batteryPowerHasChangedTrigger = new SimpleValueChangedTrigger<number>('Battery power', this, card, this)
-  }
-
-  private setupGridPowerChangedCard() {
-    const card = this.homey.flow.getDeviceTriggerCard('grid_power_has_changed')
-    this.gridPowerHasChangedTrigger = new SimpleValueChangedTrigger<number>('Grid power', this, card, this)
   }
 
   private setupConditionCards() {
@@ -454,12 +433,9 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
             try {
               updateCapabilityValue('measure_power', result.pvDelivery, this)
               updateCapabilityValue('measure_pv_delivery', result.pvDelivery, this)
-              const gridDeliveryChange = updateCapabilityValue('measure_grid_delivery', result.gridDelivery, this)
-              const batteryDeliveryChange = updateCapabilityValue('measure_battery_delivery', result.batteryDelivery * -1, this)
-              const houseConsumptionChange = updateCapabilityValue('measure_house_consumption', result.houseConsumption, this)
-              this.gridPowerHasChangedTrigger?.runIfChanged(gridDeliveryChange)
-              this.batteryPowerHasChangedTrigger?.runIfChanged(batteryDeliveryChange)
-              this.houseConsumptionHasChangedTrigger?.runIfChanged(houseConsumptionChange)
+              updateCapabilityValue('measure_grid_delivery', result.gridDelivery, this)
+              updateCapabilityValue('measure_battery_delivery', result.batteryDelivery * -1, this)
+              updateCapabilityValue('measure_house_consumption', result.houseConsumption, this)
               updateCapabilityValue('measure_battery', result.batteryChargingLevel * 100, this)
               updateCapabilityValue('external_power_delivery_connected', result.externalPowerConnected, this)
               if (result.externalPowerConnected) {
@@ -574,10 +550,8 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   }
 
   private handleBatteryData(station: RscpApi, result: LiveData, resolve: (value: (PromiseLike<unknown> | unknown)) => void) {
-    this.updateLinkedBatteryLiveData(result)
-
     if (this.updateBatteryData) {
-      this.log('Updating battery devices (detail)')
+      this.log('Updating battery devices')
       this.updateBatteryData = false
       station
           .readBatteryData(true, this)
@@ -623,25 +597,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       this.updateBatteryData = true
       resolve(undefined)
     }
-  }
-
-  private updateLinkedBatteryLiveData(result: LiveData) {
-    const batteryDevices = this.homey.drivers.getDriver('battery-module').getDevices()
-    const stationId = this.getId()
-    batteryDevices.forEach(currentDevice => {
-      const batteryConfig: BatteryModuleConfig | undefined = currentDevice.getStoreValue('settings')
-      if (!batteryConfig?.stationId) {
-        return
-      }
-      if (batteryConfig.stationId == stationId) {
-        const batteryDevice = currentDevice as unknown as BatteryModule
-        batteryDevice.syncLive(
-            result.batteryChargingLevel * 100,
-            result.batteryDelivery * -1,
-            result.chargingConfig,
-            result.emergencyPowerState)
-      }
-    })
   }
 
   private handleAvailability() {

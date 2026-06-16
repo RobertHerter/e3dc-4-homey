@@ -14,12 +14,18 @@ class BatterModuleDevice extends Homey.Device implements BatteryModule{
     this.log('BatterModuleDevice has been added');
   }
 
-  sync(batteryData: BatteryData, rsoc: number, capacity: number, batteryPowerW: number,
-  chargingConfiguration: ChargingConfiguration, emergencyPower: EmergencyPowerState) {
+  syncLive(rsoc: number, batteryPowerW: number,
+      chargingConfiguration: ChargingConfiguration, emergencyPower: EmergencyPowerState) {
     updateCapabilityValue('measure_power', batteryPowerW, this)
+    updateCapabilityValue('measure_battery', rsoc, this)
+    this.updatePowerLimits(chargingConfiguration, emergencyPower)
+  }
+
+  sync(batteryData: BatteryData, rsoc: number, capacity: number, batteryPowerW: number,
+      chargingConfiguration: ChargingConfiguration, emergencyPower: EmergencyPowerState) {
+    this.syncLive(rsoc, batteryPowerW, chargingConfiguration, emergencyPower)
     updateCapabilityValue('device_name', batteryData.name, this)
     updateCapabilityValue('measure_dcbcount', batteryData.dcbs.length, this)
-    updateCapabilityValue('measure_battery', rsoc, this)
     updateCapabilityValue('measure_capacity', capacity, this)
     updateCapabilityValue('measure_voltage', batteryData.voltage, this)
     let minTemp = 0
@@ -42,7 +48,9 @@ class BatterModuleDevice extends Homey.Device implements BatteryModule{
     updateCapabilityValue('measure_temperature', sumTemp / sensorCount, this)
     updateCapabilityValue('measure_temperature_max', maxTemp, this)
     updateCapabilityValue('measure_temperature_min', minTemp, this)
+  }
 
+  private updatePowerLimits(chargingConfiguration: ChargingConfiguration, emergencyPower: EmergencyPowerState) {
     let maxChargingPower = chargingConfiguration.maxPossibleChargingPower
     let maxDischargingPower = chargingConfiguration.maxPossibleDischargingPower
     if (chargingConfiguration.currentLimitations.chargingLimitationsEnabled) {

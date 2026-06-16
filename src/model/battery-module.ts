@@ -5,6 +5,12 @@ import {BatteryData} from './battery-data';
 import {ChargingConfiguration, EmergencyPowerState} from 'easy-rscp';
 
 export interface BatteryModule extends InternalDevice{
+    syncLive(
+        rsoc: number,
+        batteryPowerW: number,
+        chargingConfiguration: ChargingConfiguration,
+        emergencyPower: EmergencyPowerState): void
+
     sync(
         batteryData: BatteryData,
         rsoc: number,
