@@ -11,7 +11,6 @@ import {
   isSunModeAlreadyActive,
   isSunModeAlreadyInactive,
 } from '../../src/utils/wallbox-command-guard';
-import {formatError} from '../../src/utils/error-utils';
 
 const SYNC_CACHE_MAX_AGE_MS = 30_000;
 
@@ -26,21 +25,14 @@ class WallboxDevice extends Homey.Device implements Wallbox {
   }
 
   private async migrateCapabilities(): Promise<void> {
-    const legacyCapabilities = [
-      'evcharger_charging',
-      'evcharger_charging_state',
-      'measure_wallbox_consumption',
-    ];
-    for (const capability of legacyCapabilities) {
-      if (!this.hasCapability(capability)) {
-        continue;
-      }
-      try {
-        await this.removeCapability(capability);
-        this.log(`Removed legacy capability ${capability}`);
-      } catch (e) {
-        this.error(`Failed to remove legacy capability ${capability}: ${formatError(e)}`);
-      }
+    if (this.hasCapability('evcharger_charging')) {
+      await this.removeCapability('evcharger_charging');
+    }
+    if (this.hasCapability('evcharger_charging_state')) {
+      await this.removeCapability('evcharger_charging_state');
+    }
+    if (this.hasCapability('measure_wallbox_consumption')) {
+      await this.removeCapability('measure_wallbox_consumption');
     }
   }
 

@@ -5,7 +5,6 @@ import {updateCapabilityValue} from '../../src/utils/capability-utils';
 import {getTypeName} from '../../src/utils/i18n-utils';
 import {I18n} from '../../src/internal-api/i18n';
 import {clearTimeout} from 'node:timers';
-import {formatError} from '../../src/utils/error-utils';
 
 const SYNC_INTERVAL_SUMMARY = 1000 * 60 * 5; // 5 min
 // const SYNC_INTERVAL = 1000 * 20; // 20 sec
@@ -26,26 +25,15 @@ class SummaryDevice extends Homey.Device implements I18n{
 
   private autoSync() {
     this.log('Auto sync ...')
-    this.sync()
-        .then(() => {
-          this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL_SUMMARY)
-        })
-        .catch(reason => {
-          this.error('Auto sync failed: ' + formatError(reason))
-          this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL_SUMMARY)
-        })
+    this.sync().then(() => {
+      this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL_SUMMARY)
+    })
   }
 
   async sync() {
     return new Promise((resolve, reject) => {
       const hpsDevices = this.homey.drivers.getDriver('home-power-station').getDevices()
-      const ownConfig: SummaryConfig | undefined = this.getStoreValue('settings')
-      if (!ownConfig?.stationId) {
-        this.error('Summary device has no store settings — sync skipped')
-        this.setUnavailable(this.homey.__('messages.hps-device-not-found')).then()
-        resolve(undefined)
-        return
-      }
+      const ownConfig: SummaryConfig = this.getStoreValue('settings')
       updateCapabilityValue('date_range', getTypeName(ownConfig.type, this), this)
       const stationId = ownConfig.stationId
       const stationToUse = hpsDevices.find(value => {
@@ -77,7 +65,8 @@ class SummaryDevice extends Homey.Device implements I18n{
               resolve(undefined)
             })
             .catch(e => {
-              this.error('error reading summary data: ' + formatError(e))
+              this.error('error reading summary data')
+              this.error(e)
               this.syncErrorCount++
               if (this.syncErrorCount >= MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE) {
                 this.setUnavailable(this.homey.__('messages.hps-not-available')).then()

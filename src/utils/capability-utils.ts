@@ -1,5 +1,6 @@
 import {ValueChanged} from '../model/value-changed';
 import {Device} from 'homey';
+import {formatError} from './error-utils';
 
 export function updateCapabilityValue<T>(id: string, newValue: T, device: Device): ValueChanged<T> | undefined {
     if (device.hasCapability(id)) {
@@ -10,8 +11,7 @@ export function updateCapabilityValue<T>(id: string, newValue: T, device: Device
         device.addCapability(id)
             .then(value => executeUpdateCapabilityValue(id, newValue, device))
             .catch(reason => {
-                device.error('Adding of capability ' + id + ' failed. Reason: ' + reason)
-                device.error(reason)
+                device.error('Adding of capability ' + id + ' failed: ' + formatError(reason))
             })
         return undefined
     }

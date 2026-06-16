@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.4.9",
+  "version": "1.4.11",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -67,8 +67,9 @@
         "en": "Battery monitor",
         "de": "Batteriemonitor"
       },
-      "class": "other",
+      "class": "battery",
       "capabilities": [
+        "measure_power",
         "device_name",
         "measure_dcbcount",
         "measure_battery",
@@ -93,9 +94,7 @@
         "xlarge": "/drivers/battery-module/assets/images/xlarge.png"
       },
       "energy": {
-        "batteries": [
-          "INTERNAL"
-        ]
+        "homeBattery": true
       },
       "pair": [
         {
@@ -122,6 +121,7 @@
       },
       "class": "solarpanel",
       "capabilities": [
+        "measure_power",
         "measure_pv_delivery",
         "measure_grid_delivery",
         "measure_battery_delivery",
@@ -140,6 +140,14 @@
         "small": "/drivers/home-power-station/assets/images/small.png",
         "large": "/drivers/home-power-station/assets/images/large.png",
         "xlarge": "/drivers/home-power-station/assets/images/xlarge.png"
+      },
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "PV power",
+            "de": "PV Leistung"
+          }
+        }
       },
       "energy": {
         "batteries": [

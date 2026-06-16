@@ -63,7 +63,6 @@ import {IsIslandModeActiveConditionCard} from '../../src/cards/condition/is-isla
 import {IsIslandModePossibleConditionCard} from '../../src/cards/condition/is-island-mode-possible.condition.card';
 import {WallboxConfig} from '../../src/model/wallbox.config';
 import {Wallbox} from '../../src/model/wallbox';
-import {formatError} from '../../src/utils/error-utils';
 
 
 const SYNC_INTERVAL = 1000 * 20; // 20 sec
@@ -140,23 +139,14 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
 
 
   private setupTriggerCards() {
-    const steps: Array<{ name: string, run: () => void }> = [
-      { name: 'firmware_has_changed', run: () => this.setupFirmwareChangedCard() },
-      { name: 'max_charging_limit_has_changed', run: () => this.setupMaxChargingLimitChangedCard() },
-      { name: 'max_discharging_limit_has_changed', run: () => this.setupMaxDischargingLimitChangedCard() },
-      { name: 'manual_charge_cards', run: () => this.setupStartManualChargeCards() },
-      { name: 'manual_battery_charging_started', run: () => this.setupManualBatteryChargingStartedCard() },
-      { name: 'manual_battery_charging_stopped', run: () => this.setupManualBatteryChargingStoppedCard() },
-      { name: 'island_mode', run: () => this.setupIslandModeCards() },
-      { name: 'emergency_power_reserve_has_changed', run: () => this.setupEmergencyPowerReserveChangedCard() },
-    ]
-    steps.forEach(step => {
-      try {
-        step.run()
-      } catch (e) {
-        this.error(`Trigger card setup failed (${step.name}): ${formatError(e)}`)
-      }
-    })
+    this.setupFirmwareChangedCard()
+    this.setupMaxChargingLimitChangedCard()
+    this.setupMaxDischargingLimitChangedCard()
+    this.setupStartManualChargeCards()
+    this.setupManualBatteryChargingStartedCard()
+    this.setupManualBatteryChargingStoppedCard()
+    this.setupIslandModeCards()
+    this.setupEmergencyPowerReserveChangedCard()
   }
 
   private setupIslandModeCards() {
@@ -344,14 +334,9 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
 
   private autoSync() {
     this.log('Auto sync ...')
-    this.sync()
-        .then(() => {
-          this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL)
-        })
-        .catch(reason => {
-          this.error('Auto sync failed: ' + formatError(reason))
-          this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL)
-        })
+    this.sync().then(() => {
+      this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL)
+    })
   }
 
   getId(): string {
@@ -371,7 +356,8 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
               resolve(value[0].capacity)
             })
             .catch(reason => {
-              this.error('getBatteryCapacity: Error reading battery data: ' + formatError(reason))
+              this.error('getBatteryCapacity: Error reading battery data')
+              this.error(reason)
               reject(reason)
             })
       }
@@ -411,37 +397,32 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       station
           .readLiveData(true, this)
           .then(result => {
-            try {
-              updateCapabilityValue('measure_power', result.pvDelivery, this)
-              updateCapabilityValue('measure_pv_delivery', result.pvDelivery, this)
-              updateCapabilityValue('measure_grid_delivery', result.gridDelivery, this)
-              updateCapabilityValue('measure_battery_delivery', result.batteryDelivery * -1, this)
-              updateCapabilityValue('measure_house_consumption', result.houseConsumption, this)
-              updateCapabilityValue('measure_battery', result.batteryChargingLevel * 100, this)
-              updateCapabilityValue('external_power_delivery_connected', result.externalPowerConnected, this)
-              if (result.externalPowerConnected) {
-                updateCapabilityValue('measure_external_power_delivery', result.externalPowerDelivery, this)
-              }
-              else {
-                if (this.hasCapability('measure_external_power_delivery')) {
-                  this.removeCapability('measure_external_power_delivery').then()
-                }
-              }
-              this.handleChargeTimeCapability(result);
-              this.handleFirmwareChange(result);
-              this.handleChargingConfigurationChanges(result);
-              this.handleManualChargeStateChanges(result)
-              this.handleEmergencyPowerStateChanges(result)
-              this.handleWallbox(result)
-              this.handleAvailability();
-              this.handleBatteryData(station, result, resolve);
-            } catch (e) {
-              this.error('Error processing live data: ' + formatError(e))
-              resolve(undefined)
+            updateCapabilityValue('measure_pv_delivery', result.pvDelivery, this)
+            updateCapabilityValue('measure_grid_delivery', result.gridDelivery, this)
+            updateCapabilityValue('measure_battery_delivery', result.batteryDelivery * -1, this)
+            updateCapabilityValue('measure_house_consumption', result.houseConsumption, this)
+            updateCapabilityValue('measure_battery', result.batteryChargingLevel * 100, this)
+            updateCapabilityValue('external_power_delivery_connected', result.externalPowerConnected, this)
+            if (result.externalPowerConnected) {
+              updateCapabilityValue('measure_external_power_delivery', result.externalPowerDelivery, this)
             }
+            else {
+              if (this.hasCapability('measure_external_power_delivery')) {
+                this.removeCapability('measure_external_power_delivery').then()
+              }
+            }
+            this.handleChargeTimeCapability(result);
+            this.handleFirmwareChange(result);
+            this.handleChargingConfigurationChanges(result);
+            this.handleManualChargeStateChanges(result)
+            this.handleEmergencyPowerStateChanges(result)
+            this.handleWallbox(result)
+            this.handleAvailability();
+            this.handleBatteryData(station, result, resolve);
           })
           .catch(e => {
-            this.error('Error reading live data: ' + formatError(e))
+            this.error('Error reading live data')
+            this.error(e)
             this.syncErrorCount++
             if (this.syncErrorCount >= MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE) {
               this.setUnavailable(this.homey.__('messages.hps-not-available')).then()
@@ -453,23 +434,22 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   }
 
   private handleWallbox(data: LiveData) {
-    // Wallbox live data lives on dedicated wallbox devices (evcharger). Drop legacy HPS caps.
-    if (this.hasCapability('measure_wallbox_consumption')) {
-      this.removeCapability('measure_wallbox_consumption').then()
+    if (data.wallboxPowerState.length == 0) {
+      if (this.hasCapability('measure_wallbox_consumption')) {
+        this.removeCapability('measure_wallbox_consumption').then()
+      }
+      if (this.hasCapability('measure_wallbox_solarshare')) {
+        this.removeCapability('measure_wallbox_solarshare').then()
+      }
     }
-    if (this.hasCapability('measure_wallbox_solarshare')) {
-      this.removeCapability('measure_wallbox_solarshare').then()
-    }
+    else {
+      updateCapabilityValue('measure_wallbox_consumption', data.wallboxCompleteConsumption, this)
+      updateCapabilityValue('measure_wallbox_solarshare', data.wallboxCompleteConsumptionSolarShare, this)
 
-    if (data.wallboxPowerState.length > 0) {
       const wallboxDevices = this.homey.drivers.getDriver('wallbox').getDevices()
       const stationId = this.getId()
       wallboxDevices.forEach(currentDevice => {
-        const wallboxConfig: WallboxConfig | undefined = currentDevice.getStoreValue('settings')
-        if (!wallboxConfig?.stationId) {
-          this.log('Skipping wallbox device without store settings: ' + currentDevice.getName())
-          return
-        }
+        const wallboxConfig: WallboxConfig = currentDevice.getStoreValue('settings')
         if (wallboxConfig.stationId == stationId) {
           this.log('Updating wallbox device: ' + currentDevice.getName())
           const wallboxDevice = currentDevice as unknown as Wallbox
@@ -543,11 +523,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
             const batteryDevices = this.homey.drivers.getDriver('battery-module').getDevices()
             const stationId = this.getId()
             batteryDevices.forEach(currentDevice => {
-              const batteryConfig: BatteryModuleConfig | undefined = currentDevice.getStoreValue('settings')
-              if (!batteryConfig?.stationId) {
-                this.log('Skipping battery device without store settings: ' + currentDevice.getName())
-                return
-              }
+              const batteryConfig: BatteryModuleConfig = currentDevice.getStoreValue('settings')
               if (batteryConfig.stationId == stationId) {
                 this.log('Updating battery device: ' + currentDevice.getName())
                 const batteryDevice = currentDevice as unknown as BatteryModule
@@ -556,7 +532,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
                       batteryData[0],
                       result.batteryChargingLevel * 100,
                       capa / 1000.0,
-                      result.batteryDelivery * -1,
                       result.chargingConfig,
                       result.emergencyPowerState)
                 })
@@ -565,7 +540,8 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
             })
           })
           .catch(reason => {
-            this.log('Error reading battery monitoring data: ' + formatError(reason))
+            this.log('Error reading battery monitoring data')
+            this.error(reason)
           })
           .finally(() => resolve(undefined))
     } else {

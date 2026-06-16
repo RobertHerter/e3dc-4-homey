@@ -1,4 +1,12 @@
 {
+  "1.4.11": {
+    "de": "- Homey Energy (ab 12.4.5): HKW liefert wieder `measure_power` (= PV) für Solar/Leistungs-Kachel\n- Batteriemonitor: Geräteklasse `battery` + `homeBattery` + Lade-/Entladeleistung\n- Legacy-Wallbox-Sensoren am HKW entfernt (eigene Wallbox-Geräte); Flow-Trigger robuster registriert",
+    "en": "- Homey Energy (12.4.5+): HPS exposes `measure_power` (= PV) for solar/main power tile\n- Battery monitor: `battery` class + `homeBattery` + charge/discharge power\n- Removed legacy wallbox sensors on HPS (use wallbox devices); more robust flow trigger registration"
+  },
+  "1.4.10": {
+    "de": "- Crash-Fix: Sync-Schleife bricht nicht mehr ab bei fehlenden Geräte-Settings oder Verarbeitungsfehlern\n- Fehlerlogs zeigen lesbare Meldungen statt „[object Object]“",
+    "en": "- Crash fix: sync loop no longer dies on missing device store settings or processing errors\n- Error logs show readable messages instead of “[object Object]”"
+  },
   "1.4.9": {
     "de": "- Wallbox-Kachel: doppelte Leistungsanzeige entfernt (`measure_wallbox_consumption` weg, nur noch `measure_power`)",
     "en": "- Wallbox tile: removed duplicate power sensor (`measure_wallbox_consumption`; keep `measure_power` only)"

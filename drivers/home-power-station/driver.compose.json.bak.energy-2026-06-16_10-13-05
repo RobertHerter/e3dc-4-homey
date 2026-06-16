@@ -33,11 +33,6 @@
       }
     }
   },
-  "energy": {
-    "batteries": [
-      "INTERNAL"
-    ]
-  },
   "pair": [
     {
       "id": "connect",

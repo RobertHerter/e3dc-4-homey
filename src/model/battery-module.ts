@@ -9,6 +9,7 @@ export interface BatteryModule extends InternalDevice{
         batteryData: BatteryData,
         rsoc: number,
         capacity: number,
+        batteryPowerW: number,
         chargingConfiguration: ChargingConfiguration,
         emergencyPower: EmergencyPowerState): void
 }

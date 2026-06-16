@@ -14,8 +14,9 @@ class BatterModuleDevice extends Homey.Device implements BatteryModule{
     this.log('BatterModuleDevice has been added');
   }
 
-  sync(batteryData: BatteryData, rsoc: number, capacity: number, chargingConfiguration: ChargingConfiguration,
-  emergencyPower: EmergencyPowerState) {
+  sync(batteryData: BatteryData, rsoc: number, capacity: number, batteryPowerW: number,
+  chargingConfiguration: ChargingConfiguration, emergencyPower: EmergencyPowerState) {
+    updateCapabilityValue('measure_power', batteryPowerW, this)
     updateCapabilityValue('device_name', batteryData.name, this)
     updateCapabilityValue('measure_dcbcount', batteryData.dcbs.length, this)
     updateCapabilityValue('measure_battery', rsoc, this)
