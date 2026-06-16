@@ -21,6 +21,7 @@ export interface DiagnosticSnapshot {
     batteryPct?: number;
     wallboxDeviceCount: number;
     batteryDeviceCount: number;
+    gridMeterDeviceCount: number;
     firmware?: string;
 }
 
@@ -68,7 +69,8 @@ export class DeviceDiagnostic {
         }
         lines.push(
             `Geräte / devices: Wallbox ${snapshot.wallboxDeviceCount}`
-            + ` | Batteriemonitor / battery monitor ${snapshot.batteryDeviceCount}`,
+            + ` | Batteriemonitor / battery monitor ${snapshot.batteryDeviceCount}`
+            + ` | Netz / grid meter ${snapshot.gridMeterDeviceCount}`,
         );
         if (snapshot.firmware) {
             lines.push(`Firmware: ${snapshot.firmware}`);

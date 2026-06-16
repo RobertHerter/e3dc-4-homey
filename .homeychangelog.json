@@ -1,4 +1,8 @@
 {
+  "1.5.0": {
+    "de": "- Neues Gerät **Netz** für Homey Energy (Bezug/Einspeisung): `meter_power.imported` / `.exported`\n- Nach Pairing pro HKW: Geräte → E3DC → Netz hinzufügen",
+    "en": "- New **Grid meter** device for Homey Energy (import/export): `meter_power.imported` / `.exported`\n- Pair per HPS: Devices → E3DC → Grid meter"
+  },
   "1.4.16": {
     "de": "- Homey Energy: kWh-Werte via `meter_power` — HKW/Akku integrieren Leistung, Wallbox nutzt RSCP-Gesamtenergie\n- Bestehende Geräte erhalten `meter_power` automatisch beim App-Start",
     "en": "- Homey Energy: kWh via `meter_power` — HPS/battery integrate power, wallbox uses RSCP total energy\n- Existing devices auto-gain `meter_power` on app start"

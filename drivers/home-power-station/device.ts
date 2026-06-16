@@ -63,6 +63,8 @@ import {IsIslandModeActiveConditionCard} from '../../src/cards/condition/is-isla
 import {IsIslandModePossibleConditionCard} from '../../src/cards/condition/is-island-mode-possible.condition.card';
 import {WallboxConfig} from '../../src/model/wallbox.config';
 import {Wallbox} from '../../src/model/wallbox';
+import {GridMeterConfig} from '../../src/model/grid-meter.config';
+import {GridMeter} from '../../src/model/grid-meter';
 import {formatError} from '../../src/utils/error-utils';
 import {DeviceDiagnostic, DiagnosticSnapshot} from '../../src/utils/device-diagnostic';
 import {ExportDiagnosticReportActionCard} from '../../src/cards/action/export-diagnostic-report.action.card';
@@ -497,6 +499,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
               this.handleManualChargeStateChanges(result)
               this.handleEmergencyPowerStateChanges(result)
               this.handleWallbox(result)
+              this.updateLinkedGridMeter(result)
               this.handleAvailability();
               this.recordSyncSuccess(result)
               this.publishDiagnosticReport().catch(() => undefined)
@@ -646,6 +649,21 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     }
   }
 
+  private updateLinkedGridMeter(result: LiveData): void {
+    const gridMeterDevices = this.homey.drivers.getDriver('grid-meter').getDevices()
+    const stationId = this.getId()
+    gridMeterDevices.forEach(currentDevice => {
+      const gridConfig: GridMeterConfig | undefined = currentDevice.getStoreValue('settings')
+      if (!gridConfig?.stationId) {
+        return
+      }
+      if (gridConfig.stationId === stationId) {
+        const gridMeter = currentDevice as unknown as GridMeter
+        gridMeter.sync(result.gridDelivery)
+      }
+    })
+  }
+
   private updateLinkedBatteryLiveData(result: LiveData) {
     const batteryDevices = this.homey.drivers.getDriver('battery-module').getDevices()
     const stationId = this.getId()
@@ -778,6 +796,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       batteryPct: this.lastSnapshot.batteryPct,
       wallboxDeviceCount: this.countLinkedDevices('wallbox'),
       batteryDeviceCount: this.countLinkedDevices('battery-module'),
+      gridMeterDeviceCount: this.countLinkedDevices('grid-meter'),
       firmware: this.lastSnapshot.firmware,
     }
   }

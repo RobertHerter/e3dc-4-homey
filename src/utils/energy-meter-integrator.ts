@@ -6,6 +6,8 @@ export interface EnergyMeterIntegratorState {
   chargedKwh: number;
   dischargedKwh: number;
   generatedKwh: number;
+  importedKwh: number;
+  exportedKwh: number;
   lastSampleMs?: number;
 }
 
@@ -17,6 +19,22 @@ export class EnergyMeterIntegrator {
     const state = this.load();
     this.integrateSignedPower(state, Math.max(0, powerW), nowMs, 'generatedKwh');
     return state.generatedKwh;
+  }
+
+  integrateGrid(gridPowerW: number, nowMs: number = Date.now()): { importedKwh: number; exportedKwh: number } {
+    const state = this.load();
+    if (gridPowerW > 0) {
+      this.integrateSignedPower(state, gridPowerW, nowMs, 'importedKwh');
+    } else if (gridPowerW < 0) {
+      this.integrateSignedPower(state, Math.abs(gridPowerW), nowMs, 'exportedKwh');
+    } else {
+      state.lastSampleMs = nowMs;
+      this.save(state);
+    }
+    return {
+      importedKwh: state.importedKwh,
+      exportedKwh: state.exportedKwh,
+    };
   }
 
   integrateBattery(powerW: number, nowMs: number = Date.now()): { chargedKwh: number; dischargedKwh: number } {
@@ -39,7 +57,7 @@ export class EnergyMeterIntegrator {
     state: EnergyMeterIntegratorState,
     powerW: number,
     nowMs: number,
-    field: 'chargedKwh' | 'dischargedKwh' | 'generatedKwh',
+    field: 'chargedKwh' | 'dischargedKwh' | 'generatedKwh' | 'importedKwh' | 'exportedKwh',
   ): void {
     if (state.lastSampleMs !== undefined && nowMs > state.lastSampleMs && powerW > 0) {
       const deltaHours = (nowMs - state.lastSampleMs) / 3_600_000;
@@ -56,12 +74,16 @@ export class EnergyMeterIntegrator {
         chargedKwh: 0,
         dischargedKwh: 0,
         generatedKwh: 0,
+        importedKwh: 0,
+        exportedKwh: 0,
       };
     }
     return {
       chargedKwh: Number(stored.chargedKwh) || 0,
       dischargedKwh: Number(stored.dischargedKwh) || 0,
       generatedKwh: Number(stored.generatedKwh) || 0,
+      importedKwh: Number(stored.importedKwh) || 0,
+      exportedKwh: Number(stored.exportedKwh) || 0,
       lastSampleMs: stored.lastSampleMs,
     };
   }
