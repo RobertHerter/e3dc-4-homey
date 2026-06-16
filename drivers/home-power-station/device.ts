@@ -120,7 +120,23 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     }
   }
 
+  private async migrateLegacyCapabilities(): Promise<void> {
+    const legacyCapabilities = ['measure_pv_delivery']
+    for (const capability of legacyCapabilities) {
+      if (!this.hasCapability(capability)) {
+        continue
+      }
+      try {
+        await this.removeCapability(capability)
+        this.log(`Removed legacy capability ${capability}`)
+      } catch (e) {
+        this.error(`Failed to remove legacy capability ${capability}: ${formatError(e)}`)
+      }
+    }
+  }
+
   private doInit() {
+    this.migrateLegacyCapabilities().then()
     this.diagnostic.info(`App ${this.getAppVersion()} — HKW initialisiert`)
     this.setupActionCards()
     this.setupConditionCards()
@@ -453,7 +469,6 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
           .then(result => {
             try {
               updateCapabilityValue('measure_power', result.pvDelivery, this)
-              updateCapabilityValue('measure_pv_delivery', result.pvDelivery, this)
               const gridDeliveryChange = updateCapabilityValue('measure_grid_delivery', result.gridDelivery, this)
               const batteryDeliveryChange = updateCapabilityValue('measure_battery_delivery', result.batteryDelivery * -1, this)
               const houseConsumptionChange = updateCapabilityValue('measure_house_consumption', result.houseConsumption, this)

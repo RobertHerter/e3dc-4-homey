@@ -63,7 +63,7 @@ class MyApp extends Homey.App {
           id: stationId,
           powerState: {
             consumption: station.getCapabilityValue('measure_house_consumption'),
-            pvPower: station.getCapabilityValue('measure_pv_delivery'),
+            pvPower: station.getCapabilityValue('measure_power'),
             gridPower: station.getCapabilityValue('measure_grid_delivery') * -1,
             batteryPower: station.getCapabilityValue('measure_battery_delivery'),
             batteryLevel: station.getCapabilityValue('measure_battery'),

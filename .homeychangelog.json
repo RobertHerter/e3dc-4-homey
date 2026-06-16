@@ -1,4 +1,8 @@
 {
+  "1.4.15": {
+    "de": "- HKW-Kachel: doppelte „PV Leistung“ entfernt (Legacy-Capability `measure_pv_delivery` weg, nur noch `measure_power` für Homey Energy)",
+    "en": "- HPS tile: removed duplicate “PV power” (legacy `measure_pv_delivery` dropped; `measure_power` only for Homey Energy)"
+  },
   "1.4.14": {
     "de": "- Diagnosebericht nur noch unter HKW-Einstellungen → Diagnose (Support), nicht mehr auf der Gerätekachel",
     "en": "- Diagnostic report only in HPS settings → Diagnosis (support), no longer on the device tile"
