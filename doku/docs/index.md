@@ -2,7 +2,9 @@
 
 E3DC 4 Homey is an UNOFFICIAL app for the Homey smart home hub to access E3DC home power stations.
 
-E3DC is a brand of HagerEnergy Gmbh ([website](https://www.e3dc.com/)). I have nothing to do with the company, except that I own a home power plant from E3DC and wanted to include it in my SmartHome. This "desire" gave birth to E3DC 4 Homey. 
+E3DC is a brand of HagerEnergy Gmbh ([website](https://www.e3dc.com/)). I have nothing to do with the company, except that I own a home power plant from E3DC and wanted to include it in my SmartHome. This "desire" gave birth to E3DC 4 Homey.
+
+**Community & support:** [Homey forum thread — App für E3DC Hauskraftwerke](https://community.homey.app/t/app-pro-e3dc-hauskraftwerke/105181) (feedback, test versions, help). See also [Community & Support](about/community.md).
 
 ## How it works
 The E3DC house power plants provide a TCP/IP interface for read and write access. This interface and the content is completely proprietary and is called RSCP.
@@ -21,5 +23,5 @@ The access data is only requested by the RSCP interface for authentication.
 
 ## Help wanted!
 The E3DC interface is not documented and I have to find out a lot by trial and error. I also only have one home power station and can therefore only test to a limited extent.
-If you encounter a problem, have a different model or are missing a feature: Just let me know in the [community thread](https://community.homey.app/t/app-pro-e3dc-hauskraftwerke/105181) or open a [ticket](https://github.com/Copiis/e3dc-4-homey/issues) here.
+If you encounter a problem, have a different model or are missing a feature: post in the [Homey forum thread](https://community.homey.app/t/app-pro-e3dc-hauskraftwerke/105181) or open a [GitHub issue](https://github.com/Copiis/e3dc-4-homey/issues).
 I will do my best to help you find a solution.
