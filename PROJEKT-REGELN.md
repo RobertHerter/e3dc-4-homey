@@ -11,45 +11,44 @@ Diese Datei gilt für alle Arbeiten an diesem Repository (Fork **Copiis**, App `
 
 | Nutzer sagt | Bedeutung |
 |-------------|-----------|
-| **„upload“** (allein) | Änderungen ins **Git-Repo** bringen: `git add` → `git commit` → `git push origin master` |
-| **„upload“** + Homey / App / installieren | Zusätzlich App auf den **Homey** deployen (siehe unten) |
-| Explizit **Homey / App installieren** | Nur Gerät, kein Git nötig |
+| **„upload“** (allein) | Wie **AI-Pflicht nach Code-Änderung** (Git + Athom + lokal) |
+| Explizit **nur Git** | Nur `git push`, kein Athom |
+| Explizit **nur lokal / installieren** | Nur `homey app install`, kein Git/Athom |
 
-### Repo-Upload (bei „upload“)
+### AI-Pflicht nach jeder Code-Änderung (automatisch)
+
+**Nach jeder relevanten Änderung** am App-Code — ohne extra User-Befehl — in dieser Reihenfolge:
+
+1. Backup (vor der Änderung, sprechender Name)
+2. Version bump + `.homeychangelog.json` (DE + EN)
+3. `homey app build` (Compose → `app.json`, TypeScript)
+4. `homey app install` auf Homey `192.168.188.62`
+5. `git add -A` → `git commit` → `git push origin master`
+6. `homey app validate --level publish` → `homey app publish` (Version **nicht** erneut bumpen: `n` auf CLI-Frage)
+
+**Athom Developer Portal (User, manuell):** Build im Portal als **Test** freigeben — Live erst nach Forum-Feedback.
 
 ```bash
 cd /home/arctic/Projekte/e3dc-4-homey
-npm run build
-git add -A
-git commit -m "<kurze Beschreibung>"
-git push origin master
+nvm use
+homey app build
+homey app install
+git add -A && git commit -m "vX.Y.Z: …" && git push origin master
+homey app validate --level publish
+printf 'n\n' | homey app publish
+# → Link aus CLI: tools.developer.homey.app → Build als Test aktivieren
 ```
 
 - Remote: `https://github.com/Copiis/e3dc-4-homey.git`
-- Vor dem Commit: Build muss fehlerfrei sein; keine Credentials in `env.json` o. Ä.
-- **Node.js v22+** (`nvm use` liest `.nvmrc`) — entspricht Homey-CLI-Anforderung.
+- Vor Commit/Publish: Build + `validate --level publish` müssen grün sein; keine Credentials committen.
+- **Node.js v22+** (`nvm use` liest `.nvmrc`)
+- Kurz in der Antwort: Version, Git-Commit, Athom-Build-Link, Hinweis „Test im Portal freigeben“
 
-## Release-Ablauf (immer in dieser Reihenfolge)
+### Manueller Release-Ablauf (Referenz)
 
-1. **Lokal testen** auf dem eigenen Homey — **immer zuerst**, vor Git-Push und vor Store-Publish.
-2. **Git** — erst nach erfolgreichem Lokaltest committen/pushen.
-3. **Store** — Test-Publish oder Live nur nach Lokaltest; Forum erst nach Test-Publish.
-
-```bash
-# Schritt 1 — Lokaltest (Pflicht)
-cd /home/arctic/Projekte/e3dc-4-homey
-nvm use
-npm run build && homey app install
-# → Wallbox-Kachel, HPS-Poll, Flow-Karten am Gerät prüfen
-
-# Schritt 2 — Repo (nach OK)
-git add -A && git commit -m "..." && git push origin master
-
-# Schritt 3 — Store (nach OK)
-homey app validate --level publish
-homey app publish
-# → im Developer Portal: Test, danach ggf. Live
-```
+1. **Lokal** — `homey app install`
+2. **Git** — commit + push
+3. **Athom** — `homey app publish` → Portal: Test (User bestätigt), später ggf. Live + Forum
 
 ## Deployment (Homey)
 
