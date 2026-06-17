@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Active phases",
+    "de": "Aktive Phasen"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "decimals": 0,
+  "min": 0,
+  "max": 3,
+  "icon": "/assets/images/ev-station.svg",
+  "insights": false
+}

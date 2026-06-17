@@ -1,0 +1,19 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Vehicle SOC",
+    "de": "Fahrzeug-Ladezustand"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "units": {
+    "en": "%",
+    "de": "%"
+  },
+  "decimals": 0,
+  "min": 0,
+  "max": 100,
+  "icon": "/assets/images/ev-station.svg",
+  "insights": true
+}
