@@ -15,13 +15,11 @@ import {
 import {formatError} from '../../src/utils/error-utils';
 import {wallboxTotalEnergyKwh} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
-import {isPlausibleVehicleSocPercent} from '../../src/utils/vehicle-soc';
 
 const SYNC_CACHE_MAX_AGE_MS = 30_000;
 
 const WALLBOX_SENSOR_CAPABILITIES = [
   'meter_power',
-  'measure_vehicle_soc',
   'measure_wallbox_max_current',
   'measure_wallbox_phases',
   'wallbox_plugged',
@@ -53,6 +51,7 @@ class WallboxDevice extends Homey.Device implements Wallbox {
       'evcharger_charging',
       'evcharger_charging_state',
       'measure_wallbox_consumption',
+      'measure_vehicle_soc',
     ];
     for (const capability of legacyCapabilities) {
       if (!this.hasCapability(capability)) {
@@ -93,9 +92,6 @@ class WallboxDevice extends Homey.Device implements Wallbox {
     }
     if (state.activePhases !== undefined) {
       updateCapabilityValue('measure_wallbox_phases', state.activePhases, this);
-    }
-    if (isPlausibleVehicleSocPercent(state.socPercent)) {
-      updateCapabilityValue('measure_vehicle_soc', state.socPercent!, this);
     }
   }
 

@@ -1,4 +1,8 @@
 {
+  "1.5.14": {
+    "de": "- Wallbox: Sensor „Fahrzeug-Ladezustand“ entfernt (Tesla-Cloud-SOC nicht über lokales RSCP verfügbar)\n- Bestehende Wallbox-Geräte: Capability wird beim App-Start automatisch entfernt",
+    "en": "- Wallbox: removed “Vehicle SOC” sensor (Tesla cloud SOC not available via local RSCP)\n- Existing wallbox devices: capability auto-removed on app start"
+  },
   "1.5.13": {
     "de": "- Wallbox SOC: zusätzliche RSCP-Quellen (Ladeplan-Text, EMS Runscreen-Werte)\n- Diagnose-Report: chargePlanSoc/Text + Hinweis Tesla-Cloud\n- Kein irreführendes 0 % mehr wenn RSCP keinen SOC liefert",
     "en": "- Wallbox SOC: extra RSCP sources (charge plan text, EMS runscreen values)\n- Diagnostic report: chargePlanSoc/text + Tesla cloud note\n- No misleading 0% when RSCP provides no SOC"

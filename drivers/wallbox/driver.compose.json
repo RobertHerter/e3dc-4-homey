@@ -10,7 +10,6 @@
     "wallbox_charging",
     "wallbox_sun_mode",
     "measure_wallbox_solarshare",
-    "measure_vehicle_soc",
     "measure_wallbox_max_current",
     "measure_wallbox_phases",
     "wallbox_plugged",
