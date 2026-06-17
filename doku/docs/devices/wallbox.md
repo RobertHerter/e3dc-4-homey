@@ -5,9 +5,22 @@ of the respective wallbox.
 
 **Current capabilities (per wallbox device):**
 - `measure_power` (W) – charging power; standard for `evcharger` and Homey Energy
+- `meter_power` (kWh) – total energy charged
 - `measure_wallbox_solarshare` (W) – solar portion of the charging power
 - `wallbox_charging` (sensor) – charging allowed / stopped; mapped from RSCP `EXTERN_DATA_ALG` (read-only on device tile)
 - `wallbox_sun_mode` (sensor) – PV surplus mode; state from `EXTERN_DATA_ALG` status byte bit 7 (read-only on device tile)
+
+**Live sensors (from `EXTERN_DATA_ALG`, each HPS poll):**
+- `measure_vehicle_soc` (%) – vehicle state of charge when plugged in
+- `measure_wallbox_max_current` (A) – max charge current
+- `measure_wallbox_phases` – active phases (1–3)
+- `wallbox_plugged`, `wallbox_plug_locked`, `wallbox_schuko` – plug and Schuko outlet status
+
+**Ladepriorisierung sensors (system-wide EMS, same on every wallbox device):**
+- `wallbox_priority_battery_first` – sun mode priority: battery first vs wallbox first
+- `wallbox_battery_discharge_sun` – home battery discharge allowed in sun mode
+- `measure_wallbox_discharge_soc` (%) – min. home battery SOC for EV discharge (“Bis Ladezustand”)
+- `wallbox_battery_discharge_mix` – home battery discharge allowed in mixed mode / hold time
 
 System capability `evcharger_charging` is intentionally not used.
 
@@ -57,4 +70,4 @@ The advanced current card uses `WBTag.REQ_SET_MODE`.
 
 Status sensors are updated from this read-back on each HPS poll. Flow action cards call `applyChargingAllowed` / `applySunMode`, which read `EXTERN_DATA_ALG` first and skip the RSCP write when the wallbox is already in the requested state.
 
-More data points (energy counters, phases as sensors, errors) can be added in future releases.
+Flow action cards that change Ladepriorisierung refresh the EMS sensors after a successful write.
