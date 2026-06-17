@@ -1,4 +1,8 @@
 {
+  "1.5.6": {
+    "de": "- Netz-Kachel: **Vorzeichen-Kalibrierung** für `POWER_GRID` (S10 vs. H20 u. a.) — (gesamt)-Zähler landen auf dem richtigen Sensor\n- Bestehende Netz-Geräte kalibrieren beim App-Start neu; Integrator-Zähler werden dabei zurückgesetzt",
+    "en": "- Grid meter: **sign calibration** for `POWER_GRID` (S10 vs H20 etc.) — cumulative counters map to the correct sensor\n- Existing grid devices re-calibrate on app start; integrator counters reset during calibration"
+  },
   "1.5.5": {
     "de": "- Netz-Kachel: Tageswerte **Netzbezug (heute)** und **Netzeinspeisung (heute)** aus E3DC-Historie (wie Portal/App)\n- Kumulativ für Homey Energy unverändert (`meter_power.imported` / `.exported`)",
     "en": "- Grid meter tile: daily **grid import (today)** and **grid export (today)** from E3DC history DB (matches portal/app)\n- Cumulative Homey Energy counters unchanged (`meter_power.imported` / `.exported`)"

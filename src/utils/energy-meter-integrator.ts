@@ -22,6 +22,14 @@ export class EnergyMeterIntegrator {
     return state.generatedKwh;
   }
 
+  resetGrid(): void {
+    const state = this.load();
+    state.importedKwh = 0;
+    state.exportedKwh = 0;
+    state.lastSampleMs = undefined;
+    this.save(state);
+  }
+
   integrateGrid(gridPowerW: number, nowMs: number = Date.now()): { importedKwh: number; exportedKwh: number } {
     const state = this.load();
     if (gridPowerW > 0) {
