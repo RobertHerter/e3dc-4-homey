@@ -3,26 +3,28 @@ import {clearTimeout} from 'node:timers';
 import {GridMeter} from '../../src/model/grid-meter';
 import {GridMeterConfig} from '../../src/model/grid-meter.config';
 import {HomePowerStation} from '../../src/model/home-power-station';
+import {SummaryData} from '../../src/model/summary-data';
 import {SummaryType} from '../../src/model/summary.config';
 import {updateCapabilityValue} from '../../src/utils/capability-utils';
-import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
 import {formatError} from '../../src/utils/error-utils';
 import {
-  GRID_SIGN_CALIBRATION_VERSION,
-  GRID_SIGN_CALIBRATION_VERSION_KEY,
-  GRID_SIGN_MULTIPLIER_STORE_KEY,
-  calibrateGridSignMultiplier,
-  normalizeGridPowerW,
-  resolveGridSignMultiplier,
-} from '../../src/utils/grid-power-sign';
+  GRID_CUMULATIVE_LOGIC_VERSION,
+  GRID_CUMULATIVE_LOGIC_VERSION_KEY,
+  GRID_CUMULATIVE_STORE_KEY,
+  GridCumulativeArchive,
+  cumulativeTotalsFromArchive,
+  gridDayTotalsKwh,
+  loadGridCumulativeArchive,
+  localDateString,
+} from '../../src/utils/grid-cumulative-archive';
 
 const TODAY_SYNC_INTERVAL_MS = 1000 * 60 * 5;
 
 class GridMeterDevice extends Homey.Device implements GridMeter {
 
-  private readonly energyMeter = new EnergyMeterIntegrator(this);
   private todayLoopId: NodeJS.Timeout | null = null;
+  private lastSyncedDate?: string;
 
   async onInit() {
     this.log('GridMeterDevice has been initialized');
@@ -33,7 +35,9 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
         'measure_grid_in',
         'measure_grid_out',
       ]);
-      this.ensureSignCalibrationVersion();
+      this.ensureCumulativeLogicVersion();
+      const archive = this.loadArchive();
+      this.lastSyncedDate = archive.lastSyncedDate;
       setTimeout(() => this.scheduleTodaySync(), 5000);
     } catch (e) {
       this.error('Grid meter onInit failed: ' + formatError(e));
@@ -46,46 +50,48 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
 
   /**
    * rawGridDeliveryW: EMS POWER_GRID (same as HPS measure_grid_delivery).
-   * Sign convention varies by firmware — calibrated once using today's E3DC history.
-   * Normalized: positive = import (Bezug), negative = export (Einspeisung).
+   * No sign normalization — matches HKW display convention on this firmware.
    */
   sync(rawGridDeliveryW: number): void {
-    this.tryCalibrateGridSign(rawGridDeliveryW);
-    const gridPowerW = normalizeGridPowerW(rawGridDeliveryW, this.getGridSignMultiplier());
-    updateCapabilityValue('measure_power', gridPowerW, this);
-    const meter = this.energyMeter.integrateGrid(gridPowerW);
-    updateCapabilityValue('meter_power.imported', meter.importedKwh, this);
-    updateCapabilityValue('meter_power.exported', meter.exportedKwh, this);
+    updateCapabilityValue('measure_power', rawGridDeliveryW, this);
+    this.updateCumulativeMeters();
   }
 
-  private getGridSignMultiplier(): number {
-    return resolveGridSignMultiplier(this.getStoreValue(GRID_SIGN_MULTIPLIER_STORE_KEY));
+  private ensureCumulativeLogicVersion(): void {
+    const storedVersion = this.getStoreValue(GRID_CUMULATIVE_LOGIC_VERSION_KEY) as number | undefined;
+    if (storedVersion === GRID_CUMULATIVE_LOGIC_VERSION) {
+      return;
+    }
+    this.unsetStoreValue(GRID_CUMULATIVE_STORE_KEY).catch(() => undefined);
+    this.setStoreValue(GRID_CUMULATIVE_LOGIC_VERSION_KEY, GRID_CUMULATIVE_LOGIC_VERSION).catch(() => undefined);
+    this.lastSyncedDate = undefined;
+    this.log('Grid cumulative archive reset for v' + GRID_CUMULATIVE_LOGIC_VERSION);
   }
 
-  private ensureSignCalibrationVersion(): void {
-    const storedVersion = this.getStoreValue(GRID_SIGN_CALIBRATION_VERSION_KEY) as number | undefined;
-    if (storedVersion === GRID_SIGN_CALIBRATION_VERSION) {
-      return;
-    }
-    this.unsetStoreValue(GRID_SIGN_MULTIPLIER_STORE_KEY).catch(() => undefined);
-    this.setStoreValue(GRID_SIGN_CALIBRATION_VERSION_KEY, GRID_SIGN_CALIBRATION_VERSION).catch(() => undefined);
-    this.energyMeter.resetGrid();
-    this.log('Grid sign calibration reset for v' + GRID_SIGN_CALIBRATION_VERSION);
+  private loadArchive(): GridCumulativeArchive {
+    return loadGridCumulativeArchive(this.getStoreValue(GRID_CUMULATIVE_STORE_KEY) as GridCumulativeArchive | undefined);
   }
 
-  private tryCalibrateGridSign(rawGridDeliveryW: number): void {
-    if (this.getStoreValue(GRID_SIGN_MULTIPLIER_STORE_KEY) !== undefined) {
-      return;
-    }
-    const gridExportTodayKwh = Number(this.getCapabilityValue('measure_grid_in')) || 0;
-    const gridImportTodayKwh = Number(this.getCapabilityValue('measure_grid_out')) || 0;
-    const multiplier = calibrateGridSignMultiplier(rawGridDeliveryW, gridExportTodayKwh, gridImportTodayKwh);
-    if (multiplier === undefined) {
-      return;
-    }
-    this.setStoreValue(GRID_SIGN_MULTIPLIER_STORE_KEY, multiplier).catch(() => undefined);
-    this.energyMeter.resetGrid();
-    this.log(`Grid sign calibrated: multiplier=${multiplier} (raw=${rawGridDeliveryW}W, today in/out=${gridExportTodayKwh}/${gridImportTodayKwh} kWh)`);
+  private saveArchive(archive: GridCumulativeArchive): void {
+    this.setStoreValue(GRID_CUMULATIVE_STORE_KEY, archive).catch(() => undefined);
+  }
+
+  private updateCumulativeMeters(): void {
+    const archive = this.loadArchive();
+    const todayExportKwh = Number(this.getCapabilityValue('measure_grid_in')) || 0;
+    const todayImportKwh = Number(this.getCapabilityValue('measure_grid_out')) || 0;
+    const totals = cumulativeTotalsFromArchive(archive, todayImportKwh, todayExportKwh);
+    updateCapabilityValue('meter_power.imported', totals.importedKwh, this);
+    updateCapabilityValue('meter_power.exported', totals.exportedKwh, this);
+  }
+
+  private addSummaryToArchive(archive: GridCumulativeArchive, summary: SummaryData): GridCumulativeArchive {
+    const dayTotals = gridDayTotalsKwh(summary.gridIn, summary.gridOut);
+    return {
+      ...archive,
+      importedKwh: archive.importedKwh + dayTotals.importKwh,
+      exportedKwh: archive.exportedKwh + dayTotals.exportKwh,
+    };
   }
 
   private scheduleTodaySync(): void {
@@ -97,29 +103,34 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
 
   private syncToday(): Promise<void> {
     return new Promise(resolve => {
-      const config = this.getStoreValue('settings') as GridMeterConfig | undefined;
-      if (!config?.stationId) {
-        this.log('Grid today sync skipped: no station link in store');
+      const station = this.resolveLinkedStation();
+      if (!station) {
         resolve();
         return;
       }
-      const station = this.homey.drivers.getDriver('home-power-station').getDevices()
-        .find((device: any) => device.getId && device.getId() === config.stationId) as unknown as HomePowerStation | undefined;
-      if (!station?.getApi) {
-        this.log('Grid today sync skipped: linked HPS not found');
-        resolve();
-        return;
-      }
+      const timezone = this.homey.clock.getTimezone();
+      const todayStr = localDateString(timezone);
       station.getApi()
         .readSummaryData(SummaryType.TODAY, true, this)
-        .then(result => {
-          updateCapabilityValue('measure_grid_in', result.gridIn / 1000.0, this);
-          updateCapabilityValue('measure_grid_out', result.gridOut / 1000.0, this);
-          const stationDevice = station as unknown as Homey.Device;
-          const rawGridW = stationDevice.getCapabilityValue('measure_grid_delivery') as number;
-          if (typeof rawGridW === 'number') {
-            this.tryCalibrateGridSign(rawGridW);
+        .then(async todayResult => {
+          updateCapabilityValue('measure_grid_in', todayResult.gridIn / 1000.0, this);
+          updateCapabilityValue('measure_grid_out', todayResult.gridOut / 1000.0, this);
+
+          let archive = this.loadArchive();
+          if (this.lastSyncedDate && this.lastSyncedDate < todayStr) {
+            try {
+              const yesterdayResult = await station.getApi().readSummaryData(SummaryType.YESTERDAY, true, this);
+              archive = this.addSummaryToArchive(archive, yesterdayResult);
+              this.log(`Grid day rollover: archived ${this.lastSyncedDate} (+${(yesterdayResult.gridOut / 1000).toFixed(2)} kWh in, +${(yesterdayResult.gridIn / 1000).toFixed(2)} kWh out)`);
+            } catch (e) {
+              this.error('Grid yesterday archive failed: ' + formatError(e));
+            }
           }
+
+          archive = {...archive, lastSyncedDate: todayStr};
+          this.saveArchive(archive);
+          this.lastSyncedDate = todayStr;
+          this.updateCumulativeMeters();
           resolve();
         })
         .catch(e => {
@@ -127,6 +138,21 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
           resolve();
         });
     });
+  }
+
+  private resolveLinkedStation(): HomePowerStation | undefined {
+    const config = this.getStoreValue('settings') as GridMeterConfig | undefined;
+    if (!config?.stationId) {
+      this.log('Grid today sync skipped: no station link in store');
+      return undefined;
+    }
+    const station = this.homey.drivers.getDriver('home-power-station').getDevices()
+      .find((device: any) => device.getId && device.getId() === config.stationId) as unknown as HomePowerStation | undefined;
+    if (!station?.getApi) {
+      this.log('Grid today sync skipped: linked HPS not found');
+      return undefined;
+    }
+    return station;
   }
 
   async onRenamed(name: string) {

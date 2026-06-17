@@ -1,4 +1,8 @@
 {
+  "1.5.7": {
+    "de": "- Netz-Kachel: **(gesamt)**-Zähler aus E3DC-Tageswerten (Archiv + heute) statt Live-Integration von `POWER_GRID` — kein Vorzeichen-Problem mehr bei H20/S10\n- `measure_power` = Rohwert wie HKW `Netzleistung` (kein Flip)\n- Mitternacht: Gestern wird ins Archiv summiert; bestehende Netz-Geräte starten mit leerem Archiv",
+    "en": "- Grid meter: **cumulative** counters from E3DC daily history (archive + today) instead of live `POWER_GRID` integration — no more sign issues on H20/S10\n- `measure_power` = raw value like HPS grid power (no flip)\n- Midnight: yesterday rolled into archive; existing grid devices start with empty archive"
+  },
   "1.5.6": {
     "de": "- Netz-Kachel: **Vorzeichen-Kalibrierung** für `POWER_GRID` (S10 vs. H20 u. a.) — (gesamt)-Zähler landen auf dem richtigen Sensor\n- Bestehende Netz-Geräte kalibrieren beim App-Start neu; Integrator-Zähler werden dabei zurückgesetzt",
     "en": "- Grid meter: **sign calibration** for `POWER_GRID` (S10 vs H20 etc.) — cumulative counters map to the correct sensor\n- Existing grid devices re-calibrate on app start; integrator counters reset during calibration"
