@@ -1,6 +1,10 @@
 node_modules/
 .git/
 .idea/
+*.bak
+*.bak.*
+**/*.bak
+**/*.bak.*
 images_raw/
 raw_assets/
 doku/
