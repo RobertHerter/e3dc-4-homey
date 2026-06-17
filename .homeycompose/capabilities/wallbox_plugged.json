@@ -1,0 +1,20 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Plugged in",
+    "de": "Angesteckt"
+  },
+  "titleTrue": {
+    "en": "Plugged in",
+    "de": "Angesteckt"
+  },
+  "titleFalse": {
+    "en": "Not plugged in",
+    "de": "Nicht angesteckt"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/images/ev-station.svg",
+  "insights": false
+}

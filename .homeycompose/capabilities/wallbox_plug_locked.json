@@ -1,0 +1,20 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Plug locked",
+    "de": "Stecker verriegelt"
+  },
+  "titleTrue": {
+    "en": "Locked",
+    "de": "Verriegelt"
+  },
+  "titleFalse": {
+    "en": "Unlocked",
+    "de": "Entriegelt"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/images/ev-station.svg",
+  "insights": false
+}

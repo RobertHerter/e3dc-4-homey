@@ -1,0 +1,20 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Battery discharge (mixed mode)",
+    "de": "Batterieentladung (Mischmodus)"
+  },
+  "titleTrue": {
+    "en": "Allowed",
+    "de": "Erlaubt"
+  },
+  "titleFalse": {
+    "en": "Blocked",
+    "de": "Unterbunden"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/images/battery-unload.svg",
+  "insights": false
+}

@@ -1,0 +1,20 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Schuko outlet",
+    "de": "Schuko-Steckdose"
+  },
+  "titleTrue": {
+    "en": "On",
+    "de": "An"
+  },
+  "titleFalse": {
+    "en": "Off",
+    "de": "Aus"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/images/ev-station.svg",
+  "insights": false
+}

@@ -1,0 +1,19 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Max charge current",
+    "de": "Max. Ladestrom"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "units": {
+    "en": "A",
+    "de": "A"
+  },
+  "decimals": 0,
+  "min": 0,
+  "max": 32,
+  "icon": "/assets/images/ev-station.svg",
+  "insights": true
+}

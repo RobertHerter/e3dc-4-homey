@@ -1,0 +1,20 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Battery discharge (sun mode)",
+    "de": "Batterieentladung (Sonnenmodus)"
+  },
+  "titleTrue": {
+    "en": "Allowed",
+    "de": "Erlaubt"
+  },
+  "titleFalse": {
+    "en": "Blocked",
+    "de": "Unterbunden"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/images/battery-unload.svg",
+  "insights": false
+}
