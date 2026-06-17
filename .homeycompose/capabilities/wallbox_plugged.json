@@ -1,8 +1,8 @@
 {
   "type": "boolean",
   "title": {
-    "en": "Plugged in",
-    "de": "Angesteckt"
+    "en": "Charging cable",
+    "de": "Ladekabel"
   },
   "titleTrue": {
     "en": "Plugged in",

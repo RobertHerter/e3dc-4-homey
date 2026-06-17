@@ -15,6 +15,7 @@ import {
 import {formatError} from '../../src/utils/error-utils';
 import {wallboxTotalEnergyKwh} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
+import {isPlausibleVehicleSocPercent} from '../../src/utils/vehicle-soc';
 
 const SYNC_CACHE_MAX_AGE_MS = 30_000;
 
@@ -93,23 +94,24 @@ class WallboxDevice extends Homey.Device implements Wallbox {
     if (state.activePhases !== undefined) {
       updateCapabilityValue('measure_wallbox_phases', state.activePhases, this);
     }
-    if (this.isPlausibleVehicleSoc(state)) {
+    if (isPlausibleVehicleSocPercent(state.socPercent, state.plugged)) {
       updateCapabilityValue('measure_vehicle_soc', state.socPercent!, this);
     }
   }
 
-  syncEmsSettings(settings: WallboxEmsSettings): void {
-    updateCapabilityValue('wallbox_priority_battery_first', settings.batteryBeforeCar, this);
-    updateCapabilityValue('wallbox_battery_discharge_sun', settings.batteryToCarAllowed, this);
-    updateCapabilityValue('measure_wallbox_discharge_soc', settings.dischargeBatteryUntilPercent, this);
-    updateCapabilityValue('wallbox_battery_discharge_mix', !settings.batteryDischargeMixBlocked, this);
-  }
-
-  private isPlausibleVehicleSoc(state: WallboxLiveState): boolean {
-    if (state.socPercent === undefined || !state.plugged) {
-      return false;
+  syncEmsSettings(settings: Partial<WallboxEmsSettings>): void {
+    if (settings.batteryBeforeCar !== undefined) {
+      updateCapabilityValue('wallbox_priority_battery_first', settings.batteryBeforeCar, this);
     }
-    return state.socPercent >= 0 && state.socPercent <= 100;
+    if (settings.batteryToCarAllowed !== undefined) {
+      updateCapabilityValue('wallbox_battery_discharge_sun', settings.batteryToCarAllowed, this);
+    }
+    if (settings.dischargeBatteryUntilPercent !== undefined) {
+      updateCapabilityValue('measure_wallbox_discharge_soc', settings.dischargeBatteryUntilPercent, this);
+    }
+    if (settings.batteryDischargeMixBlocked !== undefined) {
+      updateCapabilityValue('wallbox_battery_discharge_mix', !settings.batteryDischargeMixBlocked, this);
+    }
   }
 
   private getApi(): Promise<RscpApi> {

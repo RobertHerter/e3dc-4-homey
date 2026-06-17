@@ -1,5 +1,5 @@
 import {Data, DataParser, DefaultDataParser, WBTag} from 'easy-rscp';
-import {WALLBOX_EXTERN_DATA_LEN, WALLBOX_EXTERN_SUN_MODE} from '../model/wallbox-control';
+import {WALLBOX_EXTERN_DATA_LEN} from '../model/wallbox-control';
 import {
     WB_ALG_STATUS_CHARGING_ACTIVE,
     WB_ALG_STATUS_CHARGING_CANCELED,
@@ -36,15 +36,14 @@ export class WallboxExternAlgParser {
             return undefined;
         }
         const buffer = Buffer.from(byteBlock.valueAsHex, 'hex');
-        const modeByte = buffer.readUInt8(0);
+        const prechargePercent = buffer.readUInt8(0);
         const statusByte = buffer.readUInt8(2);
         const abortByte = buffer.readUInt8(4);
         const chargingCanceled = (statusByte & WB_ALG_STATUS_CHARGING_CANCELED) !== 0 || abortByte === 1;
         const chargingActive = (statusByte & WB_ALG_STATUS_CHARGING_ACTIVE) !== 0;
-        const sunModeActive = (statusByte & WB_ALG_STATUS_SUN_MODE) !== 0
-            || modeByte === WALLBOX_EXTERN_SUN_MODE;
+        const sunModeActive = (statusByte & WB_ALG_STATUS_SUN_MODE) !== 0;
         return {
-            socPercent: modeByte,
+            socPercent: prechargePercent,
             activePhases: buffer.readUInt8(1),
             statusByte,
             maxCurrentA: buffer.readUInt8(3),

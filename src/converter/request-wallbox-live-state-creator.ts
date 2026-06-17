@@ -10,6 +10,7 @@ export class RequestWallboxLiveStateCreator implements FrameCreator<number[]> {
                 new DataBuilder().tag(WBTag.REQ_EXTERN_DATA_SUN).build(),
                 new DataBuilder().tag(WBTag.REQ_EXTERN_DATA_ALL).build(),
                 new DataBuilder().tag(WBTag.REQ_EXTERN_DATA_ALG).build(),
+                new DataBuilder().tag(WBTag.REQ_SOC).build(),
             )
             .build());
         return new FrameBuilder()

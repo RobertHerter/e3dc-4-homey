@@ -6,6 +6,7 @@ import {
     WBTag,
 } from 'easy-rscp';
 import {WallboxLiveState} from '../model/wallbox-live-state';
+import {pickVehicleSocPercent} from '../utils/vehicle-soc';
 import {WallboxExternAlgParser} from './wallbox-extern-alg-parser';
 
 export class WallboxLiveStateConverter implements FrameConverter<WallboxLiveState[]> {
@@ -29,12 +30,13 @@ export class WallboxLiveStateConverter implements FrameConverter<WallboxLiveStat
                     const sun = this.externalDataParser.parseEnergyData(sunRaw);
                     const all = this.externalDataParser.parseEnergyData(allRaw);
                     const alg = algRaw ? this.algParser.parse(algRaw) : undefined;
+                    const rscpSoc = childs.find(child => child.tag === WBTag.SOC)?.valueAsNumber();
                     result.push({
                         id: index,
                         powerW: all.powerW,
                         totalEnergyWh: all.totalEnergyWh,
                         solarPowerW: sun.powerW,
-                        socPercent: alg?.socPercent,
+                        socPercent: pickVehicleSocPercent(rscpSoc, alg?.socPercent),
                         activePhases: alg?.activePhases,
                         maxCurrentA: alg?.maxCurrentA,
                         sunModeActive: alg?.sunModeActive ?? false,

@@ -1,4 +1,16 @@
 {
+  "1.5.11": {
+    "de": "- Wallbox: Fahrzeug-Ladezustand (%) liest jetzt WBTag.SOC — funktioniert auch bei Tesla/Cloud-Anbindung in der E3/DC-App\n- Fallback: EXTERN_DATA_ALG PreCharge-Byte; Anzeige auch ohne Stecker-Status wenn SOC > 0",
+    "en": "- Wallbox: vehicle SOC (%) now reads WBTag.SOC — works with Tesla/cloud pairing in the E3/DC app\n- Fallback: EXTERN_DATA_ALG precharge byte; shown without plug status when SOC > 0"
+  },
+  "1.5.10": {
+    "de": "- Wallbox: Sensor „Batterieentladung (Mischmodus)“ zeigt korrekt Unterbunden/Erlaubt (Bool- und UChar8-Antworten der E3/DC)",
+    "en": "- Wallbox: “Battery discharge (mixed mode)” sensor now correctly shows Blocked/Allowed (E3/DC Bool and UChar8 responses)"
+  },
+  "1.5.9": {
+    "de": "- Wallbox: Sensor „Batterieentladung (Mischmodus)“ liefert wieder Werte (RSCP-Lesefix)\n- Wallbox-Kachel: Bezeichnungen angepasst — Ladepriorität (Nur im Sonnenmodus), Verriegelung, Ladekabel\n- EMS-Sync: fehlgeschlagene Einzelwerte blockieren nicht mehr alle Ladepriorisierungs-Sensoren",
+    "en": "- Wallbox: “Battery discharge (mixed mode)” sensor shows values again (RSCP read fix)\n- Wallbox tile: updated labels — priority (sun mode only), lock, charging cable\n- EMS sync: a single failed read no longer blocks all charging-priority sensors"
+  },
   "1.5.8": {
     "de": "- Wallbox-Kachel: neue Sensoren — Fahrzeug-SOC, Phasen, Max.-Strom, Stecker/Verriegelung, Schuko\n- Wallbox-Kachel: Ladepriorisierung als Status (Batterie/Wallbox zuerst, Entladung Sonnen-/Mischmodus, Entladegrenze %)\n- Bestehende Wallbox-Geräte erhalten die Sensoren automatisch beim App-Start",
     "en": "- Wallbox tile: new sensors — vehicle SOC, phases, max current, plug/lock, Schuko outlet\n- Wallbox tile: charging priority as read-only status (battery/wallbox first, sun/mixed discharge, SOC limit %)\n- Existing wallbox devices auto-gain sensors on app start"

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.5.7",
+  "version": "1.5.11",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -545,7 +545,17 @@
         "meter_power",
         "wallbox_charging",
         "wallbox_sun_mode",
-        "measure_wallbox_solarshare"
+        "measure_wallbox_solarshare",
+        "measure_vehicle_soc",
+        "measure_wallbox_max_current",
+        "measure_wallbox_phases",
+        "wallbox_plugged",
+        "wallbox_plug_locked",
+        "wallbox_schuko",
+        "wallbox_priority_battery_first",
+        "wallbox_battery_discharge_sun",
+        "measure_wallbox_discharge_soc",
+        "wallbox_battery_discharge_mix"
       ],
       "capabilitiesOptions": {
         "wallbox_charging": {
@@ -553,6 +563,30 @@
           "preventTag": true
         },
         "wallbox_sun_mode": {
+          "preventInsights": true,
+          "preventTag": true
+        },
+        "wallbox_plugged": {
+          "preventInsights": true,
+          "preventTag": true
+        },
+        "wallbox_plug_locked": {
+          "preventInsights": true,
+          "preventTag": true
+        },
+        "wallbox_schuko": {
+          "preventInsights": true,
+          "preventTag": true
+        },
+        "wallbox_priority_battery_first": {
+          "preventInsights": true,
+          "preventTag": true
+        },
+        "wallbox_battery_discharge_sun": {
+          "preventInsights": true,
+          "preventTag": true
+        },
+        "wallbox_battery_discharge_mix": {
           "preventInsights": true,
           "preventTag": true
         }
@@ -2911,6 +2945,25 @@
       "insights": true,
       "decimals": 0
     },
+    "measure_vehicle_soc": {
+      "type": "number",
+      "title": {
+        "en": "Vehicle SOC",
+        "de": "Fahrzeug-Ladezustand"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "%",
+        "de": "%"
+      },
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/images/ev-station.svg",
+      "insights": true
+    },
     "measure_wallbox_consumption": {
       "type": "number",
       "title": {
@@ -2927,6 +2980,59 @@
       "icon": "/assets/images/ev-station.svg",
       "insights": true,
       "decimals": 0
+    },
+    "measure_wallbox_discharge_soc": {
+      "type": "number",
+      "title": {
+        "en": "Battery discharge limit",
+        "de": "Batterie Entladegrenze"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "%",
+        "de": "%"
+      },
+      "decimals": 0,
+      "min": 0,
+      "max": 100,
+      "icon": "/assets/images/battery.svg",
+      "insights": false
+    },
+    "measure_wallbox_max_current": {
+      "type": "number",
+      "title": {
+        "en": "Max charge current",
+        "de": "Max. Ladestrom"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "A",
+        "de": "A"
+      },
+      "decimals": 0,
+      "min": 0,
+      "max": 32,
+      "icon": "/assets/images/ev-station.svg",
+      "insights": true
+    },
+    "measure_wallbox_phases": {
+      "type": "number",
+      "title": {
+        "en": "Active phases",
+        "de": "Aktive Phasen"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "decimals": 0,
+      "min": 0,
+      "max": 3,
+      "icon": "/assets/images/ev-station.svg",
+      "insights": false
     },
     "measure_wallbox_solarshare": {
       "type": "number",
@@ -2945,6 +3051,46 @@
       "insights": true,
       "decimals": 0
     },
+    "wallbox_battery_discharge_mix": {
+      "type": "boolean",
+      "title": {
+        "en": "Battery discharge (mixed mode)",
+        "de": "Batterieentladung (Mischmodus)"
+      },
+      "titleTrue": {
+        "en": "Allowed",
+        "de": "Erlaubt"
+      },
+      "titleFalse": {
+        "en": "Blocked",
+        "de": "Unterbunden"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/battery-unload.svg",
+      "insights": false
+    },
+    "wallbox_battery_discharge_sun": {
+      "type": "boolean",
+      "title": {
+        "en": "Battery discharge (sun mode)",
+        "de": "Batterieentladung (Sonnenmodus)"
+      },
+      "titleTrue": {
+        "en": "Allowed",
+        "de": "Erlaubt"
+      },
+      "titleFalse": {
+        "en": "Blocked",
+        "de": "Unterbunden"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/battery-unload.svg",
+      "insights": false
+    },
     "wallbox_charging": {
       "type": "boolean",
       "title": {
@@ -2958,6 +3104,86 @@
       "titleFalse": {
         "en": "Charging off",
         "de": "Laden aus"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/ev-station.svg",
+      "insights": false
+    },
+    "wallbox_plug_locked": {
+      "type": "boolean",
+      "title": {
+        "en": "Lock",
+        "de": "Verriegelung"
+      },
+      "titleTrue": {
+        "en": "Locked",
+        "de": "Verriegelt"
+      },
+      "titleFalse": {
+        "en": "Unlocked",
+        "de": "Entriegelt"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/ev-station.svg",
+      "insights": false
+    },
+    "wallbox_plugged": {
+      "type": "boolean",
+      "title": {
+        "en": "Charging cable",
+        "de": "Ladekabel"
+      },
+      "titleTrue": {
+        "en": "Plugged in",
+        "de": "Angesteckt"
+      },
+      "titleFalse": {
+        "en": "Not plugged in",
+        "de": "Nicht angesteckt"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/ev-station.svg",
+      "insights": false
+    },
+    "wallbox_priority_battery_first": {
+      "type": "boolean",
+      "title": {
+        "en": "Priority (sun mode only)",
+        "de": "Ladepriorität (Nur im Sonnenmodus)"
+      },
+      "titleTrue": {
+        "en": "Battery first",
+        "de": "Batterie zuerst"
+      },
+      "titleFalse": {
+        "en": "Wallbox first",
+        "de": "Wallbox zuerst"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/images/battery.svg",
+      "insights": false
+    },
+    "wallbox_schuko": {
+      "type": "boolean",
+      "title": {
+        "en": "Schuko outlet",
+        "de": "Schuko-Steckdose"
+      },
+      "titleTrue": {
+        "en": "On",
+        "de": "An"
+      },
+      "titleFalse": {
+        "en": "Off",
+        "de": "Aus"
       },
       "getable": true,
       "setable": false,

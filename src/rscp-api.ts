@@ -660,7 +660,8 @@ export class RscpApi {
                             log.log(
                                 `readWallboxLiveState id=${state.id}: chargingEnabled=${state.chargingEnabled}, `
                                 + `sunMode=${state.sunModeActive}, chargingActive=${state.chargingActive}, `
-                                + `chargingCanceled=${state.chargingCanceled}, powerW=${state.powerW}`,
+                                + `chargingCanceled=${state.chargingCanceled}, powerW=${state.powerW}, `
+                                + `vehicleSoc=${state.socPercent ?? 'n/a'}%`,
                             );
                         });
                         resolve(states);
@@ -1266,7 +1267,7 @@ export class RscpApi {
     }
 
     readWallboxDisableBatteryAtMixMode(allowReconnect: boolean = true, log: Logger): Promise<boolean> {
-        return this.emsReadBoolean(
+        return this.emsReadBoolOrUchar8AsBoolean(
             EMS_REQ_GET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
             EMS_GET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
             'readWallboxDisableBatteryAtMixMode',
@@ -1287,18 +1288,30 @@ export class RscpApi {
         )
     }
 
-    readWallboxEmsSettings(allowReconnect: boolean = true, log: Logger): Promise<WallboxEmsSettings> {
-        return Promise.all([
-            this.readBatteryBeforeCarMode(allowReconnect, log),
-            this.readBatteryToCarMode(allowReconnect, log),
-            this.readWbDischargeBatteryUntil(allowReconnect, log),
-            this.readWallboxDisableBatteryAtMixMode(allowReconnect, log),
-        ]).then(([batteryBeforeCar, batteryToCarAllowed, dischargeBatteryUntilPercent, batteryDischargeMixBlocked]) => ({
-            batteryBeforeCar,
-            batteryToCarAllowed,
-            dischargeBatteryUntilPercent,
-            batteryDischargeMixBlocked,
-        }))
+    readWallboxEmsSettings(allowReconnect: boolean = true, log: Logger): Promise<Partial<WallboxEmsSettings>> {
+        const reads: Array<{ key: keyof WallboxEmsSettings; read: () => Promise<boolean | number> }> = [
+            { key: 'batteryBeforeCar', read: () => this.readBatteryBeforeCarMode(allowReconnect, log) },
+            { key: 'batteryToCarAllowed', read: () => this.readBatteryToCarMode(allowReconnect, log) },
+            { key: 'dischargeBatteryUntilPercent', read: () => this.readWbDischargeBatteryUntil(allowReconnect, log) },
+            { key: 'batteryDischargeMixBlocked', read: () => this.readWallboxDisableBatteryAtMixMode(allowReconnect, log) },
+        ]
+
+        return Promise.allSettled(reads.map(entry => entry.read()))
+            .then(results => {
+                const settings: Partial<WallboxEmsSettings> = {}
+                results.forEach((result, index) => {
+                    const { key } = reads[index]
+                    if (result.status === 'fulfilled') {
+                        settings[key] = result.value as never
+                    } else {
+                        log.log(`readWallboxEmsSettings: ${key} failed: ${formatError(result.reason)}`)
+                    }
+                })
+                if (Object.keys(settings).length === 0) {
+                    throw new Error('All wallbox EMS settings reads failed')
+                }
+                return settings
+            })
     }
 
     private emsSetUchar8(
@@ -1442,6 +1455,52 @@ export class RscpApi {
     ): Promise<boolean> {
         return this.emsReadUchar8(reqTag, rspTag, operationName, allowReconnect, log)
             .then(value => value >= 1)
+    }
+
+    /**
+     * Some EMS tags (e.g. ENFORCE_POWER_ASSIGNMENT) return Bool on newer firmware.
+     * easy-rscp numberByTag() yields 0 for Bool — booleanByTag() is required in that case.
+     */
+    private emsReadBoolOrUchar8AsBoolean(
+        reqTag: string,
+        rspTag: string,
+        operationName: string,
+        allowReconnect: boolean,
+        log: Logger,
+    ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.getOpenConnection(log)
+                .then(con => {
+                    const request = new FrameBuilder()
+                        .addData(new DataBuilder().tag(reqTag).build())
+                        .build()
+                    con.send(request)
+                        .then(response => {
+                            const boolValue = response.booleanByTag(rspTag)
+                            const numValue = response.numberByTag(rspTag)
+                            log.log(`${operationName}: answer received (bool=${boolValue}, num=${numValue})`)
+                            resolve(boolValue || numValue >= 1)
+                        })
+                        .catch(e => this.handleEmsRequestError(
+                            () => this.emsReadBoolOrUchar8AsBoolean(reqTag, rspTag, operationName, false, log),
+                            operationName,
+                            allowReconnect,
+                            e,
+                            resolve,
+                            reject,
+                            log,
+                        ))
+                })
+                .catch(e => this.handleEmsRequestError(
+                    () => this.emsReadBoolOrUchar8AsBoolean(reqTag, rspTag, operationName, false, log),
+                    operationName,
+                    allowReconnect,
+                    e,
+                    resolve,
+                    reject,
+                    log,
+                ))
+        })
     }
 
     private emsReadBoolean(
