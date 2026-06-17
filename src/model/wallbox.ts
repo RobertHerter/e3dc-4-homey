@@ -1,4 +1,5 @@
 import {InternalDevice} from '../internal-api/internal-device';
+import {WallboxEmsSettings} from './wallbox-ems-settings';
 import {WallboxLiveState} from './wallbox-live-state';
 
 export interface WallboxCommandResult {
@@ -8,6 +9,9 @@ export interface WallboxCommandResult {
 
 export interface Wallbox extends InternalDevice{
     sync(state: WallboxLiveState): void
+
+    /** System-wide EMS Ladepriorisierung (same value on every wallbox device). */
+    syncEmsSettings(settings: WallboxEmsSettings): void
 
     /** Set max charging current (A) without changing the active mode. */
     setCurrentLimit(maxCurrentA: number): Promise<boolean>
