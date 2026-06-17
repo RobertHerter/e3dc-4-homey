@@ -23,9 +23,12 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
   }
 
   /**
-   * gridPowerW: raw EMS POWER_GRID — positive = grid import, negative = grid export.
+   * rawGridDeliveryW: EMS POWER_GRID (same as HPS measure_grid_delivery) —
+   * positive = feed-in, negative = grid import.
+   * Normalized to positive = import for Energy smart meter + kWh integrator.
    */
-  sync(gridPowerW: number): void {
+  sync(rawGridDeliveryW: number): void {
+    const gridPowerW = -rawGridDeliveryW;
     updateCapabilityValue('measure_power', gridPowerW, this);
     const meter = this.energyMeter.integrateGrid(gridPowerW);
     updateCapabilityValue('meter_power.imported', meter.importedKwh, this);

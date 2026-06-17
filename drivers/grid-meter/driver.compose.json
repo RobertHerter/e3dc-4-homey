@@ -32,8 +32,9 @@
     }
   },
   "energy": {
-    "meterPowerImportedCapability": "meter_power.imported",
-    "meterPowerExportedCapability": "meter_power.exported"
+    "cumulative": true,
+    "cumulativeImportedCapability": "meter_power.imported",
+    "cumulativeExportedCapability": "meter_power.exported"
   },
   "platforms": [
     "local"

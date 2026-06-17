@@ -1,4 +1,8 @@
 {
+  "1.5.4": {
+    "de": "- Netz-Gerät: `energy.cumulative: true` — erscheint nun als Smartmeter in Homey Energy (Bezug/Einspeisung)\n- Netz-Vorzeichen korrigiert (EMS POWER_GRID → Bezug positiv)\n- Bestehendes Netz-Gerät nach Update ggf. einmal entfernen und neu hinzufügen",
+    "en": "- Grid meter: `energy.cumulative: true` — now registers as smart meter in Homey Energy (import/export)\n- Grid sign corrected (EMS POWER_GRID → import positive)\n- Re-add existing grid meter device after update if Energy tab does not update"
+  },
   "1.5.3": {
     "de": "- Crash-Diagnose: lesbare Fehlermeldungen statt „[object Object]“ in Logs (Flow-Karten, RSCP-API, Trigger)\n- Absturz-Schutz: globale Handler für unbehandelte Fehler + fehlende .catch() im Sync\n- Geräte-Init (Wallbox, Netz, Akku) mit try/catch abgesichert",
     "en": "- Crash diagnostics: readable error messages instead of “[object Object]” in logs (flow cards, RSCP API, triggers)\n- Crash guard: global unhandled-error handlers + missing .catch() in sync loop\n- Device onInit (wallbox, grid, battery) wrapped in try/catch"
