@@ -43,6 +43,7 @@ import {SummaryData} from './model/summary-data';
 import {SummaryType} from './model/summary.config';
 import {Logger} from './internal-api/logger';
 import {formatError} from './utils/error-utils';
+import {startOfLocalCalendarDay} from './utils/grid-cumulative-archive';
 import {BatteryData, DCBData} from './model/battery-data';
 import {LogRscpCommunicationListener} from './utils/log-rscp-communication-listener';
 import {
@@ -153,15 +154,13 @@ export class RscpApi {
         })
     }
 
-    readSummaryData(summaryType: SummaryType, allowReconnect: boolean = true, log: Logger): Promise<SummaryData> {
+    readSummaryData(summaryType: SummaryType, allowReconnect: boolean = true, log: Logger, timezone?: string): Promise<SummaryData> {
         return new Promise<SummaryData>((resolve, reject) => {
-            const date = new Date()
-            date.setHours(0, 0, 0, 0)
             log.log('readSummaryData: Requesting connection ...')
             this.getOpenConnection(log)
                 .then(con => {
                     log.log('readSummaryData: Connection received')
-                    const request= this.buildFrameBySummaryType(summaryType, log)
+                    const request= this.buildFrameBySummaryType(summaryType, log, timezone)
                     log.log('readSummaryData: Sending request frame ...')
                     con.send(request)
                         .then(response => {
@@ -175,7 +174,8 @@ export class RscpApi {
                             e,
                             resolve,
                             reject,
-                            log
+                            log,
+                            timezone
                         ))
 
                 })
@@ -185,7 +185,8 @@ export class RscpApi {
                     e,
                     resolve,
                     reject,
-                    log
+                    log,
+                    timezone
                 ))
         })
     }
@@ -376,14 +377,13 @@ export class RscpApi {
         }
     }
 
-    private buildFrameBySummaryType(summaryType: SummaryType, log: Logger): Frame {
+    private buildFrameBySummaryType(summaryType: SummaryType, log: Logger, timezone?: string): Frame {
         if (summaryType == SummaryType.TODAY || summaryType == SummaryType.YESTERDAY) {
             const _24_HOURS_SECONDS = 24 * 60 * 60
-            let date = new Date()
-            if (summaryType == SummaryType.YESTERDAY) {
-                date.setDate(date.getDate() - 1)
-            }
-            date = new Date(date.setHours(0, 0, 0, 0))
+            const dayOffset = summaryType == SummaryType.YESTERDAY ? -1 : 0
+            const date = timezone
+                ? startOfLocalCalendarDay(timezone, dayOffset)
+                : this.startOfSystemCalendarDay(dayOffset)
             log.log('Startdate: ' + date + ' - duration (seconds): ' + _24_HOURS_SECONDS)
             return new FrameBuilder()
                 .addData(
@@ -459,6 +459,14 @@ export class RscpApi {
             )
             .build();
 
+    }
+
+    private startOfSystemCalendarDay(dayOffset: number): Date {
+        const date = new Date()
+        if (dayOffset !== 0) {
+            date.setDate(date.getDate() + dayOffset)
+        }
+        return new Date(date.setHours(0, 0, 0, 0))
     }
 
     private getDaysInMonth(date: Date): number {
@@ -776,6 +784,7 @@ export class RscpApi {
         resolve: ((value: SummaryData | PromiseLike<SummaryData>) => void),
         reject: ((reason?: any) => void),
         log: Logger,
+        timezone?: string,
 
     ) {
 
@@ -785,7 +794,7 @@ export class RscpApi {
             const currentConnection = connectionMap.get(this.getKey())
             this.closeConnection(currentConnection, log)
                 .finally(() => {
-                    this.readSummaryData(type, false, log)
+                    this.readSummaryData(type, false, log, timezone)
                         .then(data => {
                             log.log('readSummaryData: Retry was successfull')
                             resolve(data)

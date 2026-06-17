@@ -3,7 +3,6 @@ import {clearTimeout} from 'node:timers';
 import {GridMeter} from '../../src/model/grid-meter';
 import {GridMeterConfig} from '../../src/model/grid-meter.config';
 import {HomePowerStation} from '../../src/model/home-power-station';
-import {SummaryData} from '../../src/model/summary-data';
 import {SummaryType} from '../../src/model/summary.config';
 import {updateCapabilityValue} from '../../src/utils/capability-utils';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
@@ -13,10 +12,17 @@ import {
   GRID_CUMULATIVE_LOGIC_VERSION_KEY,
   GRID_CUMULATIVE_STORE_KEY,
   GridCumulativeArchive,
+  GridDayKwh,
+  addDayKwhToArchive,
   cumulativeTotalsFromArchive,
+  dayValuesDroppedForRollover,
+  gridDayKwhFromCapabilities,
+  gridDayKwhFromSummary,
   gridDayTotalsKwh,
+  isDayValueHigh,
   loadGridCumulativeArchive,
   localDateString,
+  needsArchiveCatchUp,
 } from '../../src/utils/grid-cumulative-archive';
 
 const TODAY_SYNC_INTERVAL_MS = 1000 * 60 * 5;
@@ -78,20 +84,96 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
 
   private updateCumulativeMeters(): void {
     const archive = this.loadArchive();
-    const todayExportKwh = Number(this.getCapabilityValue('measure_grid_in')) || 0;
-    const todayImportKwh = Number(this.getCapabilityValue('measure_grid_out')) || 0;
-    const totals = cumulativeTotalsFromArchive(archive, todayImportKwh, todayExportKwh);
+    const today = this.readTodayFromCapabilities();
+    const totals = cumulativeTotalsFromArchive(archive, today.importKwh, today.exportKwh);
     updateCapabilityValue('meter_power.imported', totals.importedKwh, this);
     updateCapabilityValue('meter_power.exported', totals.exportedKwh, this);
   }
 
-  private addSummaryToArchive(archive: GridCumulativeArchive, summary: SummaryData): GridCumulativeArchive {
-    const dayTotals = gridDayTotalsKwh(summary.gridIn, summary.gridOut);
-    return {
-      ...archive,
-      importedKwh: archive.importedKwh + dayTotals.importKwh,
-      exportedKwh: archive.exportedKwh + dayTotals.exportKwh,
-    };
+  private readTodayFromCapabilities(): GridDayKwh {
+    const exportKwh = Number(this.getCapabilityValue('measure_grid_in')) || 0;
+    const importKwh = Number(this.getCapabilityValue('measure_grid_out')) || 0;
+    return gridDayKwhFromCapabilities(importKwh, exportKwh);
+  }
+
+  private resolveArchivedDate(todayStr: string, lastSyncedDate?: string): string {
+    if (lastSyncedDate && lastSyncedDate < todayStr) {
+      return lastSyncedDate;
+    }
+    const [year, month, day] = todayStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day - 1);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  private shouldArchiveDate(archive: GridCumulativeArchive, archivedDate: string): boolean {
+    return !archive.lastArchivedDate || archivedDate > archive.lastArchivedDate;
+  }
+
+  private async applyDayRollover(
+    archive: GridCumulativeArchive,
+    previousToday: GridDayKwh,
+    newToday: GridDayKwh,
+    todayStr: string,
+    timezone: string,
+    station: HomePowerStation,
+  ): Promise<GridCumulativeArchive> {
+    const dropDetected = dayValuesDroppedForRollover(previousToday, newToday);
+    if (dropDetected) {
+      const archivedDate = this.resolveArchivedDate(todayStr, archive.lastSyncedDate);
+      if (this.shouldArchiveDate(archive, archivedDate)) {
+        const updated = addDayKwhToArchive(archive, previousToday);
+        this.log(
+          `Grid day rollover: archived ${archivedDate} from today drop (+${previousToday.importKwh.toFixed(2)} kWh import, +${previousToday.exportKwh.toFixed(2)} kWh export)`,
+        );
+        return { ...updated, lastArchivedDate: archivedDate };
+      }
+      return archive;
+    }
+
+    if (!needsArchiveCatchUp(archive, todayStr)) {
+      return archive;
+    }
+
+    if (isDayValueHigh(newToday)) {
+      this.log(
+        `Grid day rollover: waiting for today reset (import ${newToday.importKwh.toFixed(2)} / export ${newToday.exportKwh.toFixed(2)} kWh)`,
+      );
+      return archive;
+    }
+
+    const archivedDate = this.resolveArchivedDate(todayStr, archive.lastSyncedDate);
+    if (!this.shouldArchiveDate(archive, archivedDate)) {
+      return archive;
+    }
+
+    if (isDayValueHigh(previousToday)) {
+      const updated = addDayKwhToArchive(archive, previousToday);
+      this.log(
+        `Grid day rollover: archived ${archivedDate} from date fallback (+${previousToday.importKwh.toFixed(2)} kWh import, +${previousToday.exportKwh.toFixed(2)} kWh export)`,
+      );
+      return { ...updated, lastArchivedDate: archivedDate };
+    }
+
+    try {
+      const yesterdayResult = await station.getApi().readSummaryData(SummaryType.YESTERDAY, true, this, timezone);
+      const dayTotals = gridDayTotalsKwh(yesterdayResult.gridIn, yesterdayResult.gridOut);
+      const updated = {
+        ...archive,
+        importedKwh: archive.importedKwh + dayTotals.importKwh,
+        exportedKwh: archive.exportedKwh + dayTotals.exportKwh,
+        lastArchivedDate: archivedDate,
+      };
+      this.log(
+        `Grid day rollover: archived ${archivedDate} from yesterday API (+${dayTotals.importKwh.toFixed(2)} kWh import, +${dayTotals.exportKwh.toFixed(2)} kWh export)`,
+      );
+      return updated;
+    } catch (e) {
+      this.error('Grid yesterday archive failed: ' + formatError(e));
+      return archive;
+    }
   }
 
   private scheduleTodaySync(): void {
@@ -110,24 +192,18 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
       }
       const timezone = this.homey.clock.getTimezone();
       const todayStr = localDateString(timezone);
+      const previousToday = this.readTodayFromCapabilities();
       station.getApi()
-        .readSummaryData(SummaryType.TODAY, true, this)
+        .readSummaryData(SummaryType.TODAY, true, this, timezone)
         .then(async todayResult => {
-          updateCapabilityValue('measure_grid_in', todayResult.gridIn / 1000.0, this);
-          updateCapabilityValue('measure_grid_out', todayResult.gridOut / 1000.0, this);
-
+          const newToday = gridDayKwhFromSummary(todayResult.gridIn, todayResult.gridOut);
           let archive = this.loadArchive();
-          if (this.lastSyncedDate && this.lastSyncedDate < todayStr) {
-            try {
-              const yesterdayResult = await station.getApi().readSummaryData(SummaryType.YESTERDAY, true, this);
-              archive = this.addSummaryToArchive(archive, yesterdayResult);
-              this.log(`Grid day rollover: archived ${this.lastSyncedDate} (+${(yesterdayResult.gridOut / 1000).toFixed(2)} kWh in, +${(yesterdayResult.gridIn / 1000).toFixed(2)} kWh out)`);
-            } catch (e) {
-              this.error('Grid yesterday archive failed: ' + formatError(e));
-            }
-          }
+          archive = await this.applyDayRollover(archive, previousToday, newToday, todayStr, timezone, station);
 
-          archive = {...archive, lastSyncedDate: todayStr};
+          updateCapabilityValue('measure_grid_in', newToday.exportKwh, this);
+          updateCapabilityValue('measure_grid_out', newToday.importKwh, this);
+
+          archive = { ...archive, lastSyncedDate: todayStr };
           this.saveArchive(archive);
           this.lastSyncedDate = todayStr;
           this.updateCumulativeMeters();

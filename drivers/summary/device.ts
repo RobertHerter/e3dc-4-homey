@@ -58,7 +58,7 @@ class SummaryDevice extends Homey.Device implements I18n{
         const api = asStation.getApi()
         const syncType = ownConfig.type
         api
-            .readSummaryData(syncType, true, this)
+            .readSummaryData(syncType, true, this, this.homey.clock.getTimezone())
             .then(result => {
               updateCapabilityValue('measure_pv_summary', result.pvDelivery / 1000.0, this)
               updateCapabilityValue('measure_house_consumption_summary', result.houseConsumption / 1000.0, this)
