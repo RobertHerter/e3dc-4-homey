@@ -7,7 +7,9 @@
   "capabilities": [
     "measure_power",
     "meter_power.imported",
-    "meter_power.exported"
+    "meter_power.exported",
+    "measure_grid_in",
+    "measure_grid_out"
   ],
   "capabilitiesOptions": {
     "measure_power": {
@@ -29,6 +31,20 @@
         "de": "Netzeinspeisung (gesamt)"
       },
       "icon": "/assets/images/grid-feedin.svg"
+    },
+    "measure_grid_in": {
+      "title": {
+        "en": "Grid export (today)",
+        "de": "Netzeinspeisung (heute)"
+      },
+      "preventInsights": true
+    },
+    "measure_grid_out": {
+      "title": {
+        "en": "Grid import (today)",
+        "de": "Netzbezug (heute)"
+      },
+      "preventInsights": true
     }
   },
   "energy": {
