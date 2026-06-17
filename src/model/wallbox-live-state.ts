@@ -4,6 +4,9 @@ export interface WallboxSocDiagnostics {
     rscpSocRaw?: number;
     algPrecharge?: number;
     algHex?: string;
+    chargePlanText?: string;
+    chargePlanSoc?: number;
+    runscreenPercentTexts?: string[];
 }
 
 /** Live wallbox data including power readings and EXTERN_DATA_ALG control status. */

@@ -23,6 +23,13 @@ export interface DiagnosticSnapshot {
     batteryDeviceCount: number;
     gridMeterDeviceCount: number;
     firmware?: string;
+    wallboxSocPercent?: number;
+    wallboxPlugged?: boolean;
+    wallboxSocRaw?: number;
+    wallboxAlgPrecharge?: number;
+    wallboxAlgHex?: string;
+    wallboxChargePlanSoc?: number;
+    wallboxChargePlanText?: string;
 }
 
 const MAX_ENTRIES = 20;
@@ -81,6 +88,24 @@ export class DeviceDiagnostic {
         lines.push(`  Haus / house: ${formatW(snapshot.houseW)}`);
         lines.push(`  Netz / grid: ${formatW(snapshot.gridW)}`);
         lines.push(`  Batterie / battery: ${formatPct(snapshot.batteryPct)}`);
+        if (snapshot.wallboxSocPercent !== undefined
+            || snapshot.wallboxPlugged !== undefined
+            || snapshot.wallboxAlgHex !== undefined) {
+            lines.push('');
+            lines.push('Wallbox (letzter Sync / last sync):');
+            lines.push(`  Fahrzeug-SOC / vehicle SOC: ${formatPct(snapshot.wallboxSocPercent)}`);
+            lines.push(`  Stecker / plugged: ${formatBool(snapshot.wallboxPlugged)}`);
+            lines.push(`  RSCP socRaw: ${formatRaw(snapshot.wallboxSocRaw)}`);
+            lines.push(`  RSCP algPrecharge: ${formatRaw(snapshot.wallboxAlgPrecharge)}`);
+            lines.push(`  RSCP algHex: ${snapshot.wallboxAlgHex ?? '—'}`);
+            lines.push(`  RSCP chargePlanSoc: ${formatRaw(snapshot.wallboxChargePlanSoc)}`);
+            if (snapshot.wallboxChargePlanText) {
+                lines.push(`  RSCP chargePlanText: ${snapshot.wallboxChargePlanText}`);
+            }
+            if (snapshot.wallboxSocPercent === 0 || snapshot.wallboxSocPercent === undefined) {
+                lines.push('  Hinweis: E3/DC-Portal (44 %) nutzt oft Cloud — lokales RSCP liefert bei Tesla häufig 0.');
+            }
+        }
         lines.push('');
         lines.push('Log (neueste zuerst / newest first):');
         const logLines = [...this.entries].reverse().map(entry => formatEntry(entry));
@@ -113,6 +138,20 @@ function formatPct(value: number | undefined): string {
         return '—';
     }
     return `${Math.round(value)} %`;
+}
+
+function formatBool(value: boolean | undefined): string {
+    if (value === undefined) {
+        return '—';
+    }
+    return value ? 'ja / yes' : 'nein / no';
+}
+
+function formatRaw(value: number | undefined): string {
+    if (value === undefined || Number.isNaN(value)) {
+        return 'n/a';
+    }
+    return String(Math.round(value));
 }
 
 function formatEntry(entry: DiagnosticEntry): string {

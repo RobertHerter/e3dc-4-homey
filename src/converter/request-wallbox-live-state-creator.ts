@@ -1,6 +1,7 @@
 import {DataBuilder, Frame, FrameBuilder, FrameCreator, WBTag} from 'easy-rscp';
+import {EMS_REQ_GET_RUNSCREENVALUES, WB_REQ_GET_CHARGE_PLAN_TEXT} from '../model/wb-extra-tags';
 
-/** Like easy-rscp RequestWallboxLiveDataCreator, but also requests EXTERN_DATA_ALG. */
+/** Like easy-rscp RequestWallboxLiveDataCreator, but also requests EXTERN_DATA_ALG + GUI tags. */
 export class RequestWallboxLiveStateCreator implements FrameCreator<number[]> {
     create(ids: number[]): Frame {
         const content = ids.map(id => new DataBuilder()
@@ -11,10 +12,12 @@ export class RequestWallboxLiveStateCreator implements FrameCreator<number[]> {
                 new DataBuilder().tag(WBTag.REQ_EXTERN_DATA_ALL).build(),
                 new DataBuilder().tag(WBTag.REQ_EXTERN_DATA_ALG).build(),
                 new DataBuilder().tag(WBTag.REQ_SOC).build(),
+                new DataBuilder().tag(WB_REQ_GET_CHARGE_PLAN_TEXT).build(),
             )
             .build());
         return new FrameBuilder()
             .addData(...content)
+            .addData(new DataBuilder().tag(EMS_REQ_GET_RUNSCREENVALUES).build())
             .build();
     }
 }

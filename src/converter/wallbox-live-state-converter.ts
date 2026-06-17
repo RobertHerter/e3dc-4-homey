@@ -5,7 +5,10 @@ import {
     FrameConverter,
     WBTag,
 } from 'easy-rscp';
+import {EMS_GET_RUNSCREENVALUES} from '../model/wb-extra-tags';
 import {WallboxLiveState} from '../model/wallbox-live-state';
+import {findDataByTag} from '../utils/rscp-data-utils';
+import {findPercentStringsInTree, probeVehicleSocSources} from '../utils/rscp-soc-probe';
 import {pickVehicleSocPercent, readVehicleSocFromBlocks} from '../utils/vehicle-soc';
 import {WallboxExternAlgParser} from './wallbox-extern-alg-parser';
 
@@ -16,6 +19,12 @@ export class WallboxLiveStateConverter implements FrameConverter<WallboxLiveStat
 
     convert(frame: Frame): WallboxLiveState[] {
         const result: WallboxLiveState[] = [];
+        const runscreenBlock = findDataByTag(frame.data, EMS_GET_RUNSCREENVALUES, this.parser);
+        const runscreenPercentTexts = runscreenBlock
+            ? findPercentStringsInTree([runscreenBlock], this.parser)
+            : [];
+        const frameProbe = probeVehicleSocSources(frame.data, this.parser);
+
         frame.data
             .filter(value => value.tag === WBTag.DATA)
             .forEach(dataBlock => {
@@ -31,17 +40,28 @@ export class WallboxLiveStateConverter implements FrameConverter<WallboxLiveStat
                     const sun = this.externalDataParser.parseEnergyData(sunRaw);
                     const all = this.externalDataParser.parseEnergyData(allRaw);
                     const alg = algRaw ? this.algParser.parse(algRaw) : undefined;
-                    const rscpSoc = readVehicleSocFromBlocks(childs, this.parser);
+                    const blockProbe = probeVehicleSocSources(childs, this.parser);
+                    const rscpSoc = readVehicleSocFromBlocks(childs, this.parser) ?? blockProbe.rscpSoc;
                     result.push({
                         id: index,
                         powerW: all.powerW,
                         totalEnergyWh: all.totalEnergyWh,
                         solarPowerW: sun.powerW,
-                        socPercent: pickVehicleSocPercent(rscpSoc, alg?.socPercent),
+                        socPercent: pickVehicleSocPercent(
+                            rscpSoc,
+                            blockProbe.chargePlanSoc,
+                            frameProbe.chargePlanSoc,
+                            alg?.socPercent,
+                        ),
                         socDiagnostics: {
                             rscpSocRaw: rscpSoc,
                             algPrecharge: alg?.socPercent,
                             algHex: alg?.rawHex,
+                            chargePlanText: blockProbe.chargePlanText ?? frameProbe.chargePlanText,
+                            chargePlanSoc: blockProbe.chargePlanSoc ?? frameProbe.chargePlanSoc,
+                            runscreenPercentTexts: runscreenPercentTexts.length > 0
+                                ? runscreenPercentTexts
+                                : frameProbe.percentStrings,
                         },
                         activePhases: alg?.activePhases,
                         maxCurrentA: alg?.maxCurrentA,

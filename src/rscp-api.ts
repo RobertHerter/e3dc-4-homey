@@ -664,7 +664,9 @@ export class RscpApi {
                                 + `plugged=${state.plugged}, chargingCanceled=${state.chargingCanceled}, `
                                 + `powerW=${state.powerW}, vehicleSoc=${state.socPercent ?? 'n/a'}%, `
                                 + `socRaw=${diag?.rscpSocRaw ?? 'n/a'}, algPrecharge=${diag?.algPrecharge ?? 'n/a'}, `
-                                + `algHex=${diag?.algHex ?? 'n/a'}`,
+                                + `algHex=${diag?.algHex ?? 'n/a'}, chargePlanSoc=${diag?.chargePlanSoc ?? 'n/a'}, `
+                                + `chargePlanText=${diag?.chargePlanText ?? 'n/a'}, `
+                                + `runscreen=${diag?.runscreenPercentTexts?.join('|') ?? 'n/a'}`,
                             );
                         });
                         resolve(states);

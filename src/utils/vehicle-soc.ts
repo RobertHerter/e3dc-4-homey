@@ -19,21 +19,17 @@ export function normalizeVehicleSocPercent(raw: number | undefined): number | un
     return undefined;
 }
 
-/** Prefer dedicated WB.SOC; fall back to EXTERN_DATA_ALG precharge byte. */
-export function pickVehicleSocPercent(
-    rscpSoc: number | undefined,
-    algSoc: number | undefined,
-): number | undefined {
-    const normalizedRscp = normalizeVehicleSocPercent(rscpSoc);
-    const normalizedAlg = normalizeVehicleSocPercent(algSoc);
+/** Prefer dedicated WB.SOC; fall back to charge-plan text / EXTERN_DATA_ALG precharge. */
+export function pickVehicleSocPercent(...candidates: Array<number | undefined>): number | undefined {
+    const normalized = candidates
+        .map(normalizeVehicleSocPercent)
+        .filter((value): value is number => value !== undefined);
 
-    if (normalizedRscp !== undefined && normalizedRscp > 0) {
-        return normalizedRscp;
+    const positive = normalized.find(value => value > 0);
+    if (positive !== undefined) {
+        return positive;
     }
-    if (normalizedAlg !== undefined && normalizedAlg > 0) {
-        return normalizedAlg;
-    }
-    return normalizedRscp ?? normalizedAlg;
+    return normalized[0];
 }
 
 export function readVehicleSocFromBlocks(
@@ -43,16 +39,7 @@ export function readVehicleSocFromBlocks(
     return readTagNumber(findDataByTag(blocks, WBTag.SOC, parser));
 }
 
-export function isPlausibleVehicleSocPercent(
-    socPercent: number | undefined,
-    plugged: boolean,
-    chargingActive = false,
-): boolean {
-    if (socPercent === undefined || socPercent < 0 || socPercent > 100) {
-        return false;
-    }
-    if (socPercent > 0) {
-        return true;
-    }
-    return plugged || chargingActive;
+/** Only positive values are trustworthy — RSCP often returns 0 for cloud-paired EVs (e.g. Tesla). */
+export function isPlausibleVehicleSocPercent(socPercent: number | undefined): boolean {
+    return socPercent !== undefined && socPercent > 0 && socPercent <= 100;
 }

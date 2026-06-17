@@ -1,4 +1,8 @@
 {
+  "1.5.13": {
+    "de": "- Wallbox SOC: zusätzliche RSCP-Quellen (Ladeplan-Text, EMS Runscreen-Werte)\n- Diagnose-Report: chargePlanSoc/Text + Hinweis Tesla-Cloud\n- Kein irreführendes 0 % mehr wenn RSCP keinen SOC liefert",
+    "en": "- Wallbox SOC: extra RSCP sources (charge plan text, EMS runscreen values)\n- Diagnostic report: chargePlanSoc/text + Tesla cloud note\n- No misleading 0% when RSCP provides no SOC"
+  },
   "1.5.12": {
     "de": "- Wallbox: Fahrzeug-Ladezustand — verbesserte SOC-Auswertung (rekursives WBTag.SOC, EXTERN_DATA_ALG PreCharge 8-Byte-Layout)\n- Debug-Log: Rohwerte socRaw/algPrecharge/algHex beim HKW-Poll\n- Anzeige auch bei aktivem Laden ohne Stecker-Bit",
     "en": "- Wallbox: vehicle SOC — improved parsing (recursive WBTag.SOC, EXTERN_DATA_ALG 8-byte precharge layout)\n- Debug log: raw socRaw/algPrecharge/algHex on HPS poll\n- Display also when charging active without plug bit"

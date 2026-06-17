@@ -830,12 +830,21 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private recordSyncSuccess(result: LiveData): void {
     this.lastSyncAt = new Date()
     this.lastSyncResult = 'ok'
+    const wallbox = result.wallboxPowerState[0]
+    const wallboxDiag = wallbox?.socDiagnostics
     this.lastSnapshot = {
       pvW: result.pvDelivery,
       houseW: result.houseConsumption,
       gridW: result.gridDelivery,
       batteryPct: result.batteryChargingLevel * 100,
       firmware: result.firmwareVersion,
+      wallboxSocPercent: wallbox?.socPercent,
+      wallboxPlugged: wallbox?.plugged,
+      wallboxSocRaw: wallboxDiag?.rscpSocRaw,
+      wallboxAlgPrecharge: wallboxDiag?.algPrecharge,
+      wallboxAlgHex: wallboxDiag?.algHex,
+      wallboxChargePlanSoc: wallboxDiag?.chargePlanSoc,
+      wallboxChargePlanText: wallboxDiag?.chargePlanText,
     }
     this.diagnostic.info('Sync OK')
   }
