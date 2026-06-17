@@ -1,4 +1,8 @@
 {
+  "1.5.8": {
+    "de": "- Wallbox-Kachel: neue Sensoren — Fahrzeug-SOC, Phasen, Max.-Strom, Stecker/Verriegelung, Schuko\n- Wallbox-Kachel: Ladepriorisierung als Status (Batterie/Wallbox zuerst, Entladung Sonnen-/Mischmodus, Entladegrenze %)\n- Bestehende Wallbox-Geräte erhalten die Sensoren automatisch beim App-Start",
+    "en": "- Wallbox tile: new sensors — vehicle SOC, phases, max current, plug/lock, Schuko outlet\n- Wallbox tile: charging priority as read-only status (battery/wallbox first, sun/mixed discharge, SOC limit %)\n- Existing wallbox devices auto-gain sensors on app start"
+  },
   "1.5.7": {
     "de": "- Netz-Kachel: **(gesamt)**-Zähler aus E3DC-Tageswerten (Archiv + heute) statt Live-Integration von `POWER_GRID` — kein Vorzeichen-Problem mehr bei H20/S10\n- `measure_power` = Rohwert wie HKW `Netzleistung` (kein Flip)\n- Mitternacht: Gestern wird ins Archiv summiert; bestehende Netz-Geräte starten mit leerem Archiv",
     "en": "- Grid meter: **cumulative** counters from E3DC daily history (archive + today) instead of live `POWER_GRID` integration — no more sign issues on H20/S10\n- `measure_power` = raw value like HPS grid power (no flip)\n- Midnight: yesterday rolled into archive; existing grid devices start with empty archive"
@@ -150,7 +154,7 @@
   },
   "1.0.5": {
     "de": "- Hotfix: Neues Device konnten nicht hinzugefügt werden. Sorry!!",
-    "en": "- Hotfix: New devices could not be added. Sorry!"
+    "en": "- Hotfix: New devices could not be added. Sorry!!"
   },
   "1.1.0": {
     "de": "- Unterstützung für externe Quellen\n- einfaches Übersichtswidget\n- Typos in der deutschen Übersetzung behoben",
