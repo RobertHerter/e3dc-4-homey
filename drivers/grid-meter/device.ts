@@ -3,6 +3,7 @@ import {GridMeter} from '../../src/model/grid-meter';
 import {updateCapabilityValue} from '../../src/utils/capability-utils';
 import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
+import {formatError} from '../../src/utils/error-utils';
 
 class GridMeterDevice extends Homey.Device implements GridMeter {
 
@@ -10,7 +11,11 @@ class GridMeterDevice extends Homey.Device implements GridMeter {
 
   async onInit() {
     this.log('GridMeterDevice has been initialized');
-    await ensureCapabilities(this, ['meter_power.imported', 'meter_power.exported']);
+    try {
+      await ensureCapabilities(this, ['meter_power.imported', 'meter_power.exported']);
+    } catch (e) {
+      this.error('Grid meter onInit failed: ' + formatError(e));
+    }
   }
 
   async onAdded() {

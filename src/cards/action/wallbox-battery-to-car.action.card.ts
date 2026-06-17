@@ -1,6 +1,7 @@
 import {Wallbox} from '../../model/wallbox';
 import {isErlaubt} from '../../utils/wallbox-e3dc-settings';
 import {RunListener} from '../run-listener';
+import {formatError} from '../../utils/error-utils';
 
 export class WallboxBatteryToCarActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -22,7 +23,7 @@ export class WallboxBatteryToCarActionCard implements RunListener {
                     reject('E3/DC hat „Batterieentladung im Sonnenmodus“ abgelehnt');
                 }
             } catch (e) {
-                wallbox.error && wallbox.error('Batterieentladung im Sonnenmodus failed: ' + e);
+                wallbox.error && wallbox.error('Batterieentladung im Sonnenmodus failed: ' + formatError(e));
                 reject(e);
             }
         });

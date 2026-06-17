@@ -4,6 +4,7 @@ import {ResultCode} from 'easy-rscp';
 import {getResultCode} from '../../utils/i18n-utils';
 import {CardUnit} from '../../../drivers/home-power-station/device';
 import {HomePowerStation} from '../../model/home-power-station';
+import {formatError} from '../../utils/error-utils';
 
 export class IsMaxChargingLimitGreaterThanConditionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -29,9 +30,7 @@ export class IsMaxChargingLimitGreaterThanConditionCard implements RunListener {
                         resolve(config.currentLimitations.maxCurrentChargingPower > requestedWattLimit)
                     })
                     .catch(e => {
-                        hps.error('Reading charging configuration failed: ' + e)
-                        hps.error(e)
-                        reject(e)
+                        hps.error('Reading charging configuration failed: ' + formatError(e))                        reject(e)
                     })
             }
         })

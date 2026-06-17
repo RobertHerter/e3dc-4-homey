@@ -1,6 +1,7 @@
 import {Wallbox} from '../../model/wallbox';
 import {isUnterbunden} from '../../utils/wallbox-e3dc-settings';
 import {RunListener} from '../run-listener';
+import {formatError} from '../../utils/error-utils';
 
 export class WallboxDisableBatteryMixModeActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -24,7 +25,7 @@ export class WallboxDisableBatteryMixModeActionCard implements RunListener {
                     reject('E3/DC hat „Batterieentladung im Mischmodus“ abgelehnt');
                 }
             } catch (e) {
-                wallbox.error && wallbox.error('Batterieentladung im Mischmodus failed: ' + e);
+                wallbox.error && wallbox.error('Batterieentladung im Mischmodus failed: ' + formatError(e));
                 reject(e);
             }
         });

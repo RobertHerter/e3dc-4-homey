@@ -595,6 +595,9 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
 
           updateCapabilityValue('charge_time', finalValue, this)
         })
+        .catch(reason => {
+          this.log('handleChargeTimeCapability: ' + formatError(reason))
+        })
   }
 
   private handleBatteryData(station: RscpApi, result: LiveData, resolve: (value: (PromiseLike<unknown> | unknown)) => void) {
@@ -634,6 +637,8 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
                       result.batteryDelivery * -1,
                       result.chargingConfig,
                       result.emergencyPowerState)
+                }).catch(reason => {
+                  this.log('Battery detail sync capacity read failed: ' + formatError(reason))
                 })
 
               }

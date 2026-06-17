@@ -24,7 +24,11 @@ class WallboxDevice extends Homey.Device implements Wallbox {
 
   async onInit() {
     this.log('WallboxDevice has been initialized');
-    await this.migrateCapabilities();
+    try {
+      await this.migrateCapabilities();
+    } catch (e) {
+      this.error('Wallbox onInit failed: ' + formatError(e));
+    }
   }
 
   private async migrateCapabilities(): Promise<void> {

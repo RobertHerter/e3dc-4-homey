@@ -1,3 +1,4 @@
+import {formatError} from './error-utils';
 import Homey from 'homey';
 
 const STORE_KEY = 'energyMeterIntegrator';
@@ -90,7 +91,7 @@ export class EnergyMeterIntegrator {
 
   private save(state: EnergyMeterIntegratorState): void {
     this.device.setStoreValue(STORE_KEY, state).catch((error: unknown) => {
-      this.device.error(`Failed to persist energy meter state: ${error}`);
+      this.device.error(`Failed to persist energy meter state: ${formatError(error)}`);
     });
   }
 }

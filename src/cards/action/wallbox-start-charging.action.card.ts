@@ -2,6 +2,7 @@ import {RunListener} from '../run-listener';
 import {Wallbox} from '../../model/wallbox';
 import {DEFAULT_WALLBOX_CURRENT_A} from '../../model/wallbox-control';
 import {resolveWallboxFlowResult} from './wallbox-flow-result';
+import {formatError} from '../../utils/error-utils';
 
 export class WallboxStartChargingActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -26,7 +27,7 @@ export class WallboxStartChargingActionCard implements RunListener {
                     reject,
                 );
             } catch (e) {
-                wallbox.error && wallbox.error('Failed to start wallbox charging: ' + e);
+                wallbox.error && wallbox.error('Failed to start wallbox charging: ' + formatError(e));
                 reject(e);
             }
         });

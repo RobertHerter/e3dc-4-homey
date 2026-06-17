@@ -1,6 +1,7 @@
 import {Logger} from '../../internal-api/logger';
 import {Device, FlowCardTriggerDevice} from 'homey';
 import {TriggerCard} from '../trigger-card';
+import {formatError} from '../../utils/error-utils';
 
 export class ManualBatteryChargingStoppedTrigger implements TriggerCard<number>{
 
@@ -21,7 +22,7 @@ export class ManualBatteryChargingStoppedTrigger implements TriggerCard<number>{
             })
             .catch(reason => {
                 this.logger.error('Calling trigger card ManualBatteryChargingStoppedTrigger failed')
-                this.logger.error(reason)
+                this.logger.error(formatError(reason))
             })
     }
 }

@@ -1,4 +1,5 @@
 import Homey from 'homey';
+import {formatError} from './src/utils/error-utils';
 
 class MyApp extends Homey.App {
 
@@ -7,6 +8,13 @@ class MyApp extends Homey.App {
    */
   async onInit() {
     this.log('E3DC home-power-station has been initialized');
+
+    process.on('unhandledRejection', (reason: unknown) => {
+      this.error('Unhandled promise rejection: ' + formatError(reason));
+    });
+    process.on('uncaughtException', (err: unknown) => {
+      this.error('Uncaught exception: ' + formatError(err));
+    });
     // @ts-ignore
     const powerOverviewWidget = this.homey.dashboards.getWidget('power-overview')
     // @ts-ignore

@@ -4,6 +4,7 @@ import {ResultCode} from 'easy-rscp';
 import {getResultCode} from '../../utils/i18n-utils';
 import {CardUnit} from '../../../drivers/home-power-station/device';
 import {HomePowerStation} from '../../model/home-power-station';
+import {formatError} from '../../utils/error-utils';
 
 export class IsManualChargeActiveConditionCard implements RunListener {
     run(args: any, state: any): Promise<any> {

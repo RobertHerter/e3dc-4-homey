@@ -1,5 +1,6 @@
 import {RunListener} from '../run-listener';
 import {Wallbox} from '../../model/wallbox';
+import {formatError} from '../../utils/error-utils';
 
 export class WallboxChargingIsBlockedConditionCard implements RunListener {
     run(args: any, state: any): Promise<any> {

@@ -1,6 +1,7 @@
 import {RunListener} from '../run-listener';
 import {Wallbox} from '../../model/wallbox';
 import {resolveWallboxFlowResult} from './wallbox-flow-result';
+import {formatError} from '../../utils/error-utils';
 
 export class WallboxBlockChargingActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -22,7 +23,7 @@ export class WallboxBlockChargingActionCard implements RunListener {
                     reject,
                 );
             } catch (e) {
-                wallbox.error && wallbox.error('Failed to block wallbox charging: ' + e);
+                wallbox.error && wallbox.error('Failed to block wallbox charging: ' + formatError(e));
                 reject(e);
             }
         });

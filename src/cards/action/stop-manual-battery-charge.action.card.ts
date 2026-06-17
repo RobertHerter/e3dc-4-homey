@@ -2,6 +2,7 @@
 import {RunListener} from '../run-listener';
 import {BatteryUnit, ResultCode} from 'easy-rscp';
 import {HomePowerStation} from '../../model/home-power-station';
+import {formatError} from '../../utils/error-utils';
 
 export class StopManualBatteryChargeActionCard implements RunListener {
 
@@ -22,7 +23,7 @@ export class StopManualBatteryChargeActionCard implements RunListener {
                     })
                     .catch(reason => {
                         hps.log('StopManualBatteryChargeActionCard: failed')
-                        hps.error(reason)
+                        hps.error(formatError(reason))
                         reject(reason)
                     })
             }

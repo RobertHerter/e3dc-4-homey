@@ -1,6 +1,7 @@
 
 import {RunListener} from '../run-listener';
 import {HomePowerStation} from '../../model/home-power-station';
+import {formatError} from '../../utils/error-utils';
 
 export class IsIslandModeActiveConditionCard implements RunListener {
     run(args: any, state: any): Promise<any> {

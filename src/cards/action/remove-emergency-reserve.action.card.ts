@@ -1,5 +1,6 @@
 import {HomePowerStation} from '../../model/home-power-station';
 import {RunListener} from '../run-listener';
+import {formatError} from '../../utils/error-utils';
 
 export class RemoveEmergencyReserveActionCard implements RunListener {
 
@@ -17,9 +18,7 @@ export class RemoveEmergencyReserveActionCard implements RunListener {
                     resolve(undefined)
                 })
                 .catch(e => {
-                    hps.error('RemoveEmergencyReserveActionCard: failed')
-                    hps.error(e)
-                    reject(e)
+                    hps.error('RemoveEmergencyReserveActionCard: failed')                    reject(e)
                 })
         })
     }

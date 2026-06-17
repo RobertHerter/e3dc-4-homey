@@ -1,5 +1,6 @@
 import {HomePowerStation} from '../../model/home-power-station';
 import {RunListener} from '../run-listener';
+import {formatError} from '../../utils/error-utils';
 
 function startCharge(amount: number,
                       hps: HomePowerStation,
@@ -22,7 +23,7 @@ function startCharge(amount: number,
             })
             .catch(reason => {
                 hps.log('StartManualBatteryChargingActionCard: ' + amount + ' failed')
-                hps.error(reason)
+                hps.error(formatError(reason))
                 reject(reason)
             })
     }
@@ -54,7 +55,7 @@ export class StartManualBatteryChargeActionPercentageCard implements RunListener
                     })
                     .catch(reason => {
                         hps.log('Unable to start manual charge. Error reading battery capacity')
-                        hps.error(reason)
+                        hps.error(formatError(reason))
                         reject(reason)
                     })
             }

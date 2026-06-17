@@ -1,5 +1,6 @@
 import {Wallbox} from '../../model/wallbox';
 import {RunListener} from '../run-listener';
+import {formatError} from '../../utils/error-utils';
 
 export class WallboxDischargeBatteryUntilActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -21,7 +22,7 @@ export class WallboxDischargeBatteryUntilActionCard implements RunListener {
                     reject('E3/DC hat „Batterie Entladegrenze“ abgelehnt');
                 }
             } catch (e) {
-                wallbox.error && wallbox.error('Batterie Entladegrenze failed: ' + e);
+                wallbox.error && wallbox.error('Batterie Entladegrenze failed: ' + formatError(e));
                 reject(e);
             }
         });

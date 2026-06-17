@@ -1,5 +1,6 @@
 import {RunListener} from '../run-listener';
 import {HomePowerStation} from '../../model/home-power-station';
+import {formatError} from '../../utils/error-utils';
 
 export class ExportDiagnosticReportActionCard implements RunListener {
     run(args: { device?: HomePowerStation }, _state: unknown): Promise<{ 'diagnostic report': string }> {
@@ -11,7 +12,7 @@ export class ExportDiagnosticReportActionCard implements RunListener {
             }
             hps.buildDiagnosticReport()
                 .then(report => resolve({ 'diagnostic report': report }))
-                .catch(reason => reject(reason));
+                .catch(reason => reject(formatError(reason)));
         });
     }
 }

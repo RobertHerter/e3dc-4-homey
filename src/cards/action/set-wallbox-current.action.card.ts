@@ -1,5 +1,6 @@
 import {RunListener} from '../run-listener';
 import {Wallbox} from '../../model/wallbox';
+import {formatError} from '../../utils/error-utils';
 
 export class SetWallboxCurrentActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -22,7 +23,7 @@ export class SetWallboxCurrentActionCard implements RunListener {
                     reject('Wallbox rejected the command (check RSCP connection / permissions)');
                 }
             } catch (e) {
-                wallbox.error && wallbox.error('Failed to set wallbox current: ' + e);
+                wallbox.error && wallbox.error('Failed to set wallbox current: ' + formatError(e));
                 reject(e);
             }
         });

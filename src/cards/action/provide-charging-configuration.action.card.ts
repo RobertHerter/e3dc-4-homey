@@ -2,6 +2,7 @@ import {RunListener} from '../run-listener';
 import {ResultCode} from 'easy-rscp';
 import {getResultCode} from '../../utils/i18n-utils';
 import {HomePowerStation} from '../../model/home-power-station';
+import {formatError} from '../../utils/error-utils';
 
 export class ProvideChargingConfigurationActionCard implements RunListener {
     run(args: any, state: any): Promise<any> {
@@ -24,9 +25,7 @@ export class ProvideChargingConfigurationActionCard implements RunListener {
                     resolve(token)
                 })
                 .catch(e => {
-                    hps.error('Reading charging configuration failed: ' + e)
-                    hps.error(e)
-                    reject(e)
+                    hps.error('Reading charging configuration failed: ' + formatError(e))                    reject(e)
                 })
 
         })

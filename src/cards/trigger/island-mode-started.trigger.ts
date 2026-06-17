@@ -1,6 +1,7 @@
 import {Logger} from '../../internal-api/logger';
 import {Device, FlowCardTriggerDevice} from 'homey';
 import {TriggerCard} from '../trigger-card';
+import {formatError} from '../../utils/error-utils';
 
 export class IslandModeStartedTrigger implements TriggerCard<undefined>{
 
@@ -18,7 +19,7 @@ export class IslandModeStartedTrigger implements TriggerCard<undefined>{
             })
             .catch(reason => {
                 this.logger.error('Calling trigger card IslandModeStartedTrigger failed')
-                this.logger.error(reason)
+                this.logger.error(formatError(reason))
             })
     }
 }

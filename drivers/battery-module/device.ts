@@ -5,6 +5,7 @@ import {BatteryModule} from '../../src/model/battery-module';
 import {ChargingConfiguration, EmergencyPowerState} from 'easy-rscp';
 import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
+import {formatError} from '../../src/utils/error-utils';
 
 class BatterModuleDevice extends Homey.Device implements BatteryModule{
 
@@ -12,7 +13,11 @@ class BatterModuleDevice extends Homey.Device implements BatteryModule{
 
   async onInit() {
     this.log('BatterModuleDevice has been initialized');
-    await ensureCapabilities(this, ['meter_power.charged', 'meter_power.discharged'])
+    try {
+      await ensureCapabilities(this, ['meter_power.charged', 'meter_power.discharged']);
+    } catch (e) {
+      this.error('Battery module onInit failed: ' + formatError(e));
+    }
   }
 
   async onAdded() {

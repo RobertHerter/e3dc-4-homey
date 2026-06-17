@@ -2,6 +2,7 @@ import {ValueChangedTrigger} from '../value-changed-trigger';
 import {ValueChanged} from '../../model/value-changed';
 import {Logger} from '../../internal-api/logger';
 import {Device, FlowCardTriggerDevice} from 'homey';
+import {formatError} from '../../utils/error-utils';
 
 export class SimpleValueChangedTrigger<T> implements ValueChangedTrigger<T> {
 
@@ -32,7 +33,7 @@ export class SimpleValueChangedTrigger<T> implements ValueChangedTrigger<T> {
             })
             .catch(reason => {
                 this.logger.error('Calling trigger card ' + this.name + ' failed')
-                this.logger.error(reason)
+                this.logger.error(formatError(reason))
             })
     }
 

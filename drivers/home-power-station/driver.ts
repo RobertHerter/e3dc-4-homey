@@ -5,6 +5,7 @@ import {
   E3dcConnectionData,
 } from 'easy-rscp';
 import {RscpApi} from '../../src/rscp-api';
+import {formatError} from '../../src/utils/error-utils';
 
 class HomePowerStationDriver extends Homey.Driver {
 
@@ -67,7 +68,7 @@ class HomePowerStationDriver extends Homey.Driver {
         api.readLiveData(true, this)
             .then(e => resolve(this.homey.__('setup.connection-test.success')))
             .catch(e => {
-              resolve(this.homey.__('setup.connection-test.failed-detail', {detail: e}))
+              resolve(this.homey.__('setup.connection-test.failed-detail', {detail: formatError(e)}))
             })
       }
     })
