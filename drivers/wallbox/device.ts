@@ -94,7 +94,7 @@ class WallboxDevice extends Homey.Device implements Wallbox {
     if (state.activePhases !== undefined) {
       updateCapabilityValue('measure_wallbox_phases', state.activePhases, this);
     }
-    if (isPlausibleVehicleSocPercent(state.socPercent, state.plugged)) {
+    if (isPlausibleVehicleSocPercent(state.socPercent, state.plugged, state.chargingActive)) {
       updateCapabilityValue('measure_vehicle_soc', state.socPercent!, this);
     }
   }

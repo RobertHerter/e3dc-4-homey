@@ -657,11 +657,14 @@ export class RscpApi {
                             log.log('readWallboxLiveState: no wallbox state blocks in response');
                         }
                         states.forEach(state => {
+                            const diag = state.socDiagnostics;
                             log.log(
                                 `readWallboxLiveState id=${state.id}: chargingEnabled=${state.chargingEnabled}, `
                                 + `sunMode=${state.sunModeActive}, chargingActive=${state.chargingActive}, `
-                                + `chargingCanceled=${state.chargingCanceled}, powerW=${state.powerW}, `
-                                + `vehicleSoc=${state.socPercent ?? 'n/a'}%`,
+                                + `plugged=${state.plugged}, chargingCanceled=${state.chargingCanceled}, `
+                                + `powerW=${state.powerW}, vehicleSoc=${state.socPercent ?? 'n/a'}%, `
+                                + `socRaw=${diag?.rscpSocRaw ?? 'n/a'}, algPrecharge=${diag?.algPrecharge ?? 'n/a'}, `
+                                + `algHex=${diag?.algHex ?? 'n/a'}`,
                             );
                         });
                         resolve(states);

@@ -1,4 +1,8 @@
 {
+  "1.5.12": {
+    "de": "- Wallbox: Fahrzeug-Ladezustand — verbesserte SOC-Auswertung (rekursives WBTag.SOC, EXTERN_DATA_ALG PreCharge 8-Byte-Layout)\n- Debug-Log: Rohwerte socRaw/algPrecharge/algHex beim HKW-Poll\n- Anzeige auch bei aktivem Laden ohne Stecker-Bit",
+    "en": "- Wallbox: vehicle SOC — improved parsing (recursive WBTag.SOC, EXTERN_DATA_ALG 8-byte precharge layout)\n- Debug log: raw socRaw/algPrecharge/algHex on HPS poll\n- Display also when charging active without plug bit"
+  },
   "1.5.11": {
     "de": "- Wallbox: Fahrzeug-Ladezustand (%) liest jetzt WBTag.SOC — funktioniert auch bei Tesla/Cloud-Anbindung in der E3/DC-App\n- Fallback: EXTERN_DATA_ALG PreCharge-Byte; Anzeige auch ohne Stecker-Status wenn SOC > 0",
     "en": "- Wallbox: vehicle SOC (%) now reads WBTag.SOC — works with Tesla/cloud pairing in the E3/DC app\n- Fallback: EXTERN_DATA_ALG precharge byte; shown without plug status when SOC > 0"
