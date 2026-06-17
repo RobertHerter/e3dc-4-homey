@@ -143,7 +143,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
 
   private doInit() {
     this.migrateLegacyCapabilities().then()
-    this.diagnostic.info(`App ${this.getAppVersion()} — HKW initialisiert`)
+
     this.setupActionCards()
     this.setupConditionCards()
     this.setupTriggerCards()
@@ -846,7 +846,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       wallboxChargePlanSoc: wallboxDiag?.chargePlanSoc,
       wallboxChargePlanText: wallboxDiag?.chargePlanText,
     }
-    this.diagnostic.info('Sync OK')
+
   }
 
   private recordSyncFailure(message: string): void {

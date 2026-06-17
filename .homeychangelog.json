@@ -1,4 +1,8 @@
 {
+  "1.5.15": {
+    "de": "- HKW-Diagnose: Fehler-Log zeigt nur noch Fehler (kein „Sync OK“ bei jedem Sync mehr)\n- Sync-Status weiterhin im Report-Kopf (`Letzter Sync: ok`)",
+    "en": "- HPS diagnostic: error log shows errors only (no more “Sync OK” on every sync)\n- Sync status still in report header (`last sync: ok`)"
+  },
   "1.5.14": {
     "de": "- Wallbox: Sensor „Fahrzeug-Ladezustand“ entfernt (Tesla-Cloud-SOC nicht über lokales RSCP verfügbar)\n- Bestehende Wallbox-Geräte: Capability wird beim App-Start automatisch entfernt",
     "en": "- Wallbox: removed “Vehicle SOC” sensor (Tesla cloud SOC not available via local RSCP)\n- Existing wallbox devices: capability auto-removed on app start"

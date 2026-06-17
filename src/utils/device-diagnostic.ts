@@ -45,8 +45,9 @@ export class DeviceDiagnostic {
         }
     }
 
-    info(message: string): void {
-        this.push('info', message);
+    /** Intentionally not stored — sync status is shown in the report header. */
+    info(_message: string): void {
+        // no-op: only errors are kept for the device log
     }
 
     warn(message: string): void {
@@ -107,10 +108,11 @@ export class DeviceDiagnostic {
             }
         }
         lines.push('');
-        lines.push('Log (neueste zuerst / newest first):');
-        const logLines = [...this.entries].reverse().map(entry => formatEntry(entry));
+        lines.push('Fehler-Log (neueste zuerst / error log, newest first):');
+        const errorEntries = this.entries.filter(entry => entry.level === 'error');
+        const logLines = [...errorEntries].reverse().map(entry => formatEntry(entry));
         if (logLines.length === 0) {
-            lines.push('  (keine Einträge / no entries)');
+            lines.push('  (keine Fehler / no errors)');
         } else {
             lines.push(...logLines.map(line => `  ${line}`));
         }
