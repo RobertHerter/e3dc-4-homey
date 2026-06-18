@@ -1,4 +1,8 @@
 {
+  "1.5.17": {
+    "de": "- Wallbox-Crash behoben: fehlende Capabilities (`measure_power`, `wallbox_charging`, …) werden beim App-Start nachgerüstet; Sync wartet bis Migration fertig ist\n- `setCapabilityValue`-Fehler crashen die App nicht mehr (nur Log)",
+    "en": "- Wallbox crash fix: missing capabilities (`measure_power`, `wallbox_charging`, …) are added on app start; sync waits until migration completes\n- `setCapabilityValue` errors no longer crash the app (logged only)"
+  },
   "1.5.16": {
     "de": "- Netz-Gerät: Gesamt-Zähler archiviert erst wenn E3DC-Tageswerte auf ~0 fallen (kein Sprung mehr um Mitternacht)\n- E3DC-Tageshistorie nutzt Homey-Zeitzone statt UTC-Mitternacht\n- Kumulativ-Archiv wird einmalig neu aufgebaut (Logik v2)",
     "en": "- Grid meter: cumulative counters archive only when E3DC daily values drop to ~0 (no midnight jump)\n- E3DC daily history uses Homey timezone instead of UTC midnight\n- Cumulative archive rebuilt once (logic v2)"

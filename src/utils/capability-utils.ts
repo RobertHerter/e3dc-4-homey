@@ -21,7 +21,8 @@ function executeUpdateCapabilityValue<T>(id: string, newValue: T, device: Device
     const oldValue = device.getCapabilityValue(id);
     if (newValue !== oldValue) {
         device.log(device.getName() + ": setting new value for " + id)
-        device.setCapabilityValue(id, newValue).then(() => {
+        device.setCapabilityValue(id, newValue).catch(reason => {
+            device.error(`setCapabilityValue(${id}) failed: ${formatError(reason)}`)
         })
         return {
             oldValue: oldValue,

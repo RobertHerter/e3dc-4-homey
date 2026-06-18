@@ -18,8 +18,13 @@ import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
 
 const SYNC_CACHE_MAX_AGE_MS = 30_000;
 
-const WALLBOX_SENSOR_CAPABILITIES = [
+/** Must match drivers/wallbox/driver.compose.json — existing devices may lack caps added in later releases. */
+const WALLBOX_DRIVER_CAPABILITIES = [
+  'measure_power',
   'meter_power',
+  'wallbox_charging',
+  'wallbox_sun_mode',
+  'measure_wallbox_solarshare',
   'measure_wallbox_max_current',
   'measure_wallbox_phases',
   'wallbox_plugged',
@@ -35,18 +40,20 @@ class WallboxDevice extends Homey.Device implements Wallbox {
 
   private lastSyncedState?: WallboxLiveState;
   private lastSyncedAt = 0;
+  private capabilitiesReady = false;
 
   async onInit() {
     this.log('WallboxDevice has been initialized');
     try {
       await this.migrateCapabilities();
+      this.capabilitiesReady = true;
     } catch (e) {
       this.error('Wallbox onInit failed: ' + formatError(e));
     }
   }
 
   private async migrateCapabilities(): Promise<void> {
-    await ensureCapabilities(this, [...WALLBOX_SENSOR_CAPABILITIES]);
+    await ensureCapabilities(this, [...WALLBOX_DRIVER_CAPABILITIES]);
     const legacyCapabilities = [
       'evcharger_charging',
       'evcharger_charging_state',
@@ -71,6 +78,9 @@ class WallboxDevice extends Homey.Device implements Wallbox {
   }
 
   sync(state: WallboxLiveState): void {
+    if (!this.capabilitiesReady) {
+      return;
+    }
     this.lastSyncedState = state;
     this.lastSyncedAt = Date.now();
 
@@ -96,6 +106,9 @@ class WallboxDevice extends Homey.Device implements Wallbox {
   }
 
   syncEmsSettings(settings: Partial<WallboxEmsSettings>): void {
+    if (!this.capabilitiesReady) {
+      return;
+    }
     if (settings.batteryBeforeCar !== undefined) {
       updateCapabilityValue('wallbox_priority_battery_first', settings.batteryBeforeCar, this);
     }
