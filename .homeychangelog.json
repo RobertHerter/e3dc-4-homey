@@ -1,4 +1,8 @@
 {
+  "1.5.18": {
+    "de": "- Wallbox-Crashfix (fehlende Capabilities, Sync nach Migration) — Test-Release",
+    "en": "- Wallbox crash fix (missing capabilities, sync after migration) — test release"
+  },
   "1.5.17": {
     "de": "- Wallbox-Crash behoben: fehlende Capabilities (`measure_power`, `wallbox_charging`, …) werden beim App-Start nachgerüstet; Sync wartet bis Migration fertig ist\n- `setCapabilityValue`-Fehler crashen die App nicht mehr (nur Log)",
     "en": "- Wallbox crash fix: missing capabilities (`measure_power`, `wallbox_charging`, …) are added on app start; sync waits until migration completes\n- `setCapabilityValue` errors no longer crash the app (logged only)"
