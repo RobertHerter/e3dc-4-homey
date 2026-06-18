@@ -3,5 +3,6 @@
 /.homeybuild/
 /doku/site/
 
-# Lokale Projekt-Notizen (nicht ins Repo)
+# Lokale Projekt-Notizen (nicht ins Repo — Syncthing zwischen Arctic/Book)
 /PROJEKT-REGELN.md
+/AGENTS.md

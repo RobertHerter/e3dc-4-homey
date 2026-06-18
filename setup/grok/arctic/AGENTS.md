@@ -19,7 +19,7 @@ Prüfe zu Sessionbeginn: `hostname` oder `$HOME`.
 | **Lokales Homey-Update** | **Automatisch** nach App-Code-Änderungen | **Nie** automatisch — nur auf Kommando |
 | **Homey CLI** | Eingeloggt, Ziel `192.168.188.62` | Nicht eingerichtet |
 
-**Vor jeder e3dc-Session:** `PROJEKT-REGELN.md` im Repo lesen (lokal, nicht im Git; wird per Syncthing zwischen Arctic und Book synchronisiert). Repo-`AGENTS.md` ergänzt die Kurzregeln.
+**Vor jeder e3dc-Session:** `PROJEKT-REGELN.md` und `AGENTS.md` im Repo lesen (beide lokal, nicht im Git; Syncthing zwischen Arctic und Book).
 
 **Skill:** Bei e3dc-/Homey-Arbeit den Skill `e3dc-homey` laden (`/e3dc-homey`).
 

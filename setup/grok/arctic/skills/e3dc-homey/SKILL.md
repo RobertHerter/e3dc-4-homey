@@ -21,7 +21,7 @@ Standard-Workflow für das Repository **e3dc-4-homey** auf Arctic und Book.
    - Arctic: `/home/arctic/Projekte/e3dc-4-homey`
    - Book: `/home/book/projects/e3dc-4-homey`
 3. **`PROJEKT-REGELN.md` lesen** — enthält aktuellen Stand, Deploy-Regeln, Forum-Format. Lokal, nicht im Git (Syncthing zwischen Rechnern).
-4. **Repo-`AGENTS.md`** für Kurzregeln lesen.
+4. **`AGENTS.md` lesen** — Kurzregeln (Deploy, Flow-Konvention). Lokal, nicht im Git (Syncthing).
 
 ## Nach App-Code-Änderungen
 
