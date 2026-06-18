@@ -3,6 +3,7 @@
 /.homeybuild/
 /doku/site/
 
-# Lokale Projekt-Notizen (nicht ins Repo — Syncthing zwischen Arctic/Book)
+# KI-/Agent-Dateien (nicht ins Repo — Syncthing zwischen Arctic/Book)
 /PROJEKT-REGELN.md
 /AGENTS.md
+/setup/grok/
