@@ -33,6 +33,12 @@
         "de": "PV Leistung"
       }
     },
+    "meter_power": {
+      "title": {
+        "en": "PV generation (total)",
+        "de": "PV-Erzeugung (gesamt)"
+      }
+    },
     "diagnostic_report": {
       "preventInsights": true,
       "preventTag": true

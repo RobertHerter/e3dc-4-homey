@@ -1,4 +1,8 @@
 {
+  "1.5.19": {
+    "de": "- Spenden-Link: GitHub Sponsors (Copiis)\n- HKW: „PV-Erzeugung (gesamt)“ statt generischem „Energie“ — kumulativ seit Pairing, nicht Tages-PV\n- Wallbox: „Ladeenergie (gesamt)“ für den kWh-Zähler\n- Homepage verweist auf die Doku; Metadaten (Tags) bereinigt",
+    "en": "- Donate link: GitHub Sponsors (Copiis)\n- HPS: “PV generation (total)” instead of generic “Energy” — cumulative since pairing, not daily PV\n- Wallbox: “Charging energy (total)” for the kWh counter\n- Homepage points to docs; metadata (tags) cleaned up"
+  },
   "1.5.18": {
     "de": "- Wallbox-Crashfix (fehlende Capabilities, Sync nach Migration) — Test-Release",
     "en": "- Wallbox crash fix (missing capabilities, sync after migration) — test release"

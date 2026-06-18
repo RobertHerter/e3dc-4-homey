@@ -52,6 +52,12 @@
     "wallbox_battery_discharge_mix": {
       "preventInsights": true,
       "preventTag": true
+    },
+    "meter_power": {
+      "title": {
+        "en": "Charging energy (total)",
+        "de": "Ladeenergie (gesamt)"
+      }
     }
   },
   "energy": {
