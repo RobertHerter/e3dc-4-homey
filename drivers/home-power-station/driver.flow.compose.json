@@ -693,8 +693,8 @@
         "en": "Battery power has changed"
       },
       "hint": {
-        "de": "Wird ausgelöst, sobald sich die Batterieleistung geändert hat (positiv = Entladen, negativ = Laden)",
-        "en": "Is triggered as soon as battery power has changed (positive = discharging, negative = charging)"
+        "de": "Wird ausgelöst, sobald sich die Batterieleistung geändert hat (positiv = Laden, negativ = Entladen)",
+        "en": "Is triggered as soon as battery power has changed (positive = charging, negative = discharging)"
       },
       "tokens": [
         {
@@ -722,8 +722,8 @@
         "en": "Grid power has changed"
       },
       "hint": {
-        "de": "Wird ausgelöst, sobald sich die Netzleistung geändert hat (positiv = Einspeisung, negativ = Bezug)",
-        "en": "Is triggered as soon as grid power has changed (positive = feed-in, negative = import)"
+        "de": "Wird ausgelöst, sobald sich die Netzleistung geändert hat (positiv = Netzbezug, negativ = Netzeinspeisung)",
+        "en": "Is triggered as soon as grid power has changed (positive = grid draw, negative = grid feed-in)"
       },
       "tokens": [
         {

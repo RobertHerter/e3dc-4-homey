@@ -36,7 +36,7 @@
       "type": "checkbox",
       "value": true,
       "title": {
-        "de": "PV Leistung sichtbar",
+        "de": "PV-Leistung sichtbar",
         "en": "PV power visible"
       }
     },
