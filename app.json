@@ -255,7 +255,7 @@
         "measure_power": {
           "title": {
             "en": "PV power",
-            "de": "PV Leistung"
+            "de": "PV-Leistung"
           }
         },
         "meter_power": {
@@ -2873,7 +2873,7 @@
       "type": "number",
       "title": {
         "en": "PV power",
-        "de": "PV Leistung"
+        "de": "PV-Leistung"
       },
       "getable": true,
       "setable": false,
@@ -2943,7 +2943,7 @@
       "type": "number",
       "title": {
         "en": "Min cell temperature",
-        "de": "Min Zelltemperatur"
+        "de": "Min. Zelltemperatur"
       },
       "units": {
         "de": "°C",
