@@ -2,7 +2,7 @@
   "type": "number",
   "title": {
     "en": "Grid power",
-    "de": "Netz Leistung"
+    "de": "Netzleistung"
   },
   "getable": true,
   "setable": false,

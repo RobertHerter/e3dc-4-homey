@@ -30,7 +30,7 @@
     "measure_power": {
       "title": {
         "en": "PV power",
-        "de": "PV Leistung"
+        "de": "PV-Leistung"
       }
     },
     "meter_power": {

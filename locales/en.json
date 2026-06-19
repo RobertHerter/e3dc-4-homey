@@ -75,8 +75,8 @@
     "consumption": "Consumption",
     "pv-delivery": "PV power",
     "grid": {
-      "feed-in": "Feed in",
-      "purchase": "Power purchase",
+      "feed-in": "Grid feed-in",
+      "purchase": "Grid import",
       "general": "Grid power"
     },
     "battery": {

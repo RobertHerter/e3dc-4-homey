@@ -1,8 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "Power purchase",
-    "de": "Bezug"
+    "en": "Grid import",
+    "de": "Netzbezug"
   },
   "getable": true,
   "setable": false,

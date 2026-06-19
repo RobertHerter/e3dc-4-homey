@@ -24,20 +24,20 @@
     "measure_power": {
       "title": {
         "en": "Battery power",
-        "de": "Akkuleistung"
+        "de": "Batterieleistung"
       }
     },
     "meter_power.charged": {
       "title": {
         "en": "Battery charged (total)",
-        "de": "Akku-Ladung (gesamt)"
+        "de": "Batterie-Ladung (gesamt)"
       },
       "icon": "/assets/images/battery-load.svg"
     },
     "meter_power.discharged": {
       "title": {
         "en": "Battery discharged (total)",
-        "de": "Akku-Entladung (gesamt)"
+        "de": "Batterie-Entladung (gesamt)"
       },
       "icon": "/assets/images/battery-unload.svg"
     }

@@ -2,7 +2,7 @@
   "type": "number",
   "title": {
     "en": "PV power",
-    "de": "PV Leistung"
+    "de": "PV-Leistung"
   },
   "getable": true,
   "setable": false,

@@ -2,7 +2,7 @@
   "type": "number",
   "title": {
     "en": "Max Charging power",
-    "de": "Max Ladeleistung"
+    "de": "Max. Ladeleistung"
   },
   "getable": true,
   "setable": false,

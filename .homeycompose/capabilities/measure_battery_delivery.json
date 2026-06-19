@@ -2,7 +2,7 @@
   "type": "number",
   "title": {
     "en": "Battery power",
-    "de": "Batterie Leistung"
+    "de": "Batterieleistung"
   },
   "getable": true,
   "setable": false,

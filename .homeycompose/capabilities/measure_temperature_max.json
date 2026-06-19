@@ -2,7 +2,7 @@
   "type": "number",
   "title": {
     "en": "Max cell temperature",
-    "de": "Max Zelltemperatur"
+    "de": "Max. Zelltemperatur"
   },
   "units": {
     "de": "°C",

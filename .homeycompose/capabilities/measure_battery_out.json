@@ -1,8 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "Battery discharged",
-    "de": "Batterie entladen"
+    "en": "Battery discharge",
+    "de": "Batterieentladung"
   },
   "getable": true,
   "setable": false,

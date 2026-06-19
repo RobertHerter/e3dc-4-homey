@@ -1,8 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "Feed-in",
-    "de": "Einspeisung"
+    "en": "Grid feed-in",
+    "de": "Netzeinspeisung"
   },
   "getable": true,
   "setable": false,
