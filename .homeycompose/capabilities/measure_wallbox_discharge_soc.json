@@ -2,7 +2,7 @@
   "type": "number",
   "title": {
     "en": "Battery discharge limit",
-    "de": "Batterie Entladegrenze"
+    "de": "Batterie-Entladegrenze"
   },
   "getable": true,
   "setable": false,

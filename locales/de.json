@@ -77,13 +77,13 @@
     "consumption": "Verbrauch",
     "pv-delivery": "PV Leistung",
     "grid": {
-      "feed-in": "Einspeisung",
+      "feed-in": "Netzeinspeisung",
       "purchase": "Netzbezug",
       "general": "Netzleistung"
     },
     "battery": {
       "charging": "Bat. Laden",
-      "discharging": "Bat. Bezug",
+      "discharging": "Bat. Entladung",
       "general": "Batterie",
       "level": "Ladestand"
     },
