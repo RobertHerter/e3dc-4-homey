@@ -3,6 +3,12 @@ import {CardUnit} from '../../drivers/home-power-station/device';
 import {InternalDevice} from '../internal-api/internal-device';
 import {EmergencyPowerState, ManualChargeState} from 'easy-rscp';
 
+export interface PowerModeState {
+    mode: number
+    powerW: number
+    expiresAt: number  // Unix timestamp in ms
+}
+
 export interface HomePowerStation extends InternalDevice{
     getApi(): RscpApi
     getId(): string
@@ -12,4 +18,5 @@ export interface HomePowerStation extends InternalDevice{
     getCurrentSOC(): number
     getEmergencyPowerState(): EmergencyPowerState | null
     buildDiagnosticReport(): Promise<string>
+    setPowerModeState(state: PowerModeState | null): void
 }

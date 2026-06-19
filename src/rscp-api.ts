@@ -65,6 +65,7 @@ import {
     EMS_SET_WALLBOX_ENFORCE_POWER_ASSIGNMENT,
     EMS_SET_WB_DISCHARGE_BAT_UNTIL,
 } from './model/ems-wallbox-battery-tags';
+import {EMS_REQ_SET_POWER, EMS_REQ_SET_POWER_MODE, EMS_REQ_SET_POWER_VALUE, EMS_SET_POWER} from './model/ems-power-mode-tags';
 
 const connectionMap: Map<string, HomePowerPlantConnection> = new Map<string, HomePowerPlantConnection>()
 const connectionFactoryMap: Map<string, HomePowerPlantConnectionFactory> = new Map<string, HomePowerPlantConnectionFactory>()
@@ -549,6 +550,62 @@ export class RscpApi {
         }
         else {
             log.log('startManualCharge(' + amountWh + ': Received error. Error: ' + causingError)
+            log.log(causingError)
+            rejectAsError(reject, causingError)
+        }
+    }
+
+    setPowerMode(mode: number, powerW: number, allowReconnect: boolean = true, log: Logger): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            log.log('setPowerMode(' + mode + ', ' + powerW + 'W): called. Requesting connection')
+            this.getOpenConnection(log)
+                .then(connection => {
+                    log.log('setPowerMode(' + mode + ', ' + powerW + 'W): Connection received')
+                    const request = new FrameBuilder()
+                        .addData(
+                            new DataBuilder().tag(EMS_REQ_SET_POWER).container(
+                                new DataBuilder().tag(EMS_REQ_SET_POWER_MODE).uchar8(mode).build(),
+                                new DataBuilder().tag(EMS_REQ_SET_POWER_VALUE).int32(powerW).build()
+                            ).build()
+                        )
+                        .build()
+                    connection
+                        .send(request)
+                        .then(response => {
+                            const result = response.booleanByTag(EMS_SET_POWER)
+                            resolve(result)
+                        })
+                        .catch(reason => this.handleSetPowerModeError(
+                            mode, powerW, false, reason, resolve, reject, log
+                        ))
+                })
+                .catch(reason => this.handleSetPowerModeError(
+                    mode, powerW, false, reason, resolve, reject, log
+                ))
+        })
+    }
+
+    private handleSetPowerModeError(
+        mode: number,
+        powerW: number,
+        allowReconnect: boolean,
+        causingError: Error,
+        resolve: ((value: boolean | PromiseLike<boolean>) => void),
+        reject: ((reason?: any) => void),
+        log: Logger,
+    ) {
+        if (allowReconnect) {
+            log.log('setPowerMode(' + mode + ', ' + powerW + 'W): Received error. Try to reconnect ... (Error: ' + causingError + ')')
+            log.log(causingError)
+            const currentConnection = connectionMap.get(this.getKey())
+            this.closeConnection(currentConnection, log)
+                .finally(() => {
+                    this.setPowerMode(mode, powerW, false, log)
+                        .then(data => resolve(data))
+                        .catch(e => rejectAsError(reject, e))
+                })
+        } else {
+            log.log('setPowerMode(' + mode + ', ' + powerW + 'W): Received error. Error: ' + causingError)
             log.log(causingError)
             rejectAsError(reject, causingError)
         }

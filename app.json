@@ -1832,6 +1832,189 @@
         ]
       },
       {
+        "id": "set_power_mode_auto",
+        "title": {
+          "de": "Energiemanagement: Automatikmodus aktivieren",
+          "en": "Power management: activate automatic mode"
+        },
+        "hint": {
+          "de": "Schaltet den EMS-Leistungsmodus sofort zurück in den automatischen Modus",
+          "en": "Immediately switches the EMS power mode back to automatic mode"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=home-power-station"
+          }
+        ]
+      },
+      {
+        "id": "set_power_mode_idle",
+        "title": {
+          "de": "Energiemanagement: Batterie pausieren",
+          "en": "Power management: pause battery"
+        },
+        "titleFormatted": {
+          "de": "Batterie für [[duration]] Minuten pausieren (kein Laden/Entladen)",
+          "en": "Pause battery for [[duration]] minutes (no charging/discharging)"
+        },
+        "hint": {
+          "de": "Sperrt Laden und Entladen der Batterie für die angegebene Dauer. Danach kehrt das System automatisch in den Automatikmodus zurück.",
+          "en": "Locks charging and discharging of the battery for the specified duration. Afterwards the system automatically returns to automatic mode."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=home-power-station"
+          },
+          {
+            "type": "number",
+            "name": "duration",
+            "title": {
+              "de": "Dauer (Minuten)",
+              "en": "Duration (minutes)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "set_power_mode_charge",
+        "title": {
+          "de": "Energiemanagement: Batterie forciert laden",
+          "en": "Power management: force charge battery"
+        },
+        "titleFormatted": {
+          "de": "Batterie mit [[power]] W für [[duration]] Minuten forciert laden",
+          "en": "Force charge battery with [[power]] W for [[duration]] minutes"
+        },
+        "hint": {
+          "de": "Lädt die Batterie mit der angegebenen Leistung für die angegebene Dauer. Danach kehrt das System automatisch in den Automatikmodus zurück.",
+          "en": "Charges the battery at the specified power for the specified duration. Afterwards the system automatically returns to automatic mode."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=home-power-station"
+          },
+          {
+            "type": "number",
+            "name": "power",
+            "title": {
+              "de": "Leistung (W)",
+              "en": "Power (W)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "number",
+            "name": "duration",
+            "title": {
+              "de": "Dauer (Minuten)",
+              "en": "Duration (minutes)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "set_power_mode_discharge",
+        "title": {
+          "de": "Energiemanagement: Batterie forciert entladen",
+          "en": "Power management: force discharge battery"
+        },
+        "titleFormatted": {
+          "de": "Batterie mit [[power]] W für [[duration]] Minuten forciert entladen",
+          "en": "Force discharge battery with [[power]] W for [[duration]] minutes"
+        },
+        "hint": {
+          "de": "Entlädt die Batterie mit der angegebenen Leistung für die angegebene Dauer. Danach kehrt das System automatisch in den Automatikmodus zurück.",
+          "en": "Discharges the battery at the specified power for the specified duration. Afterwards the system automatically returns to automatic mode."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=home-power-station"
+          },
+          {
+            "type": "number",
+            "name": "power",
+            "title": {
+              "de": "Leistung (W)",
+              "en": "Power (W)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "number",
+            "name": "duration",
+            "title": {
+              "de": "Dauer (Minuten)",
+              "en": "Duration (minutes)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "set_power_mode_grid_charge",
+        "title": {
+          "de": "Energiemanagement: Batterie aus Netz laden",
+          "en": "Power management: charge battery from grid"
+        },
+        "titleFormatted": {
+          "de": "Batterie mit [[power]] W aus dem Netz für [[duration]] Minuten laden",
+          "en": "Charge battery from grid with [[power]] W for [[duration]] minutes"
+        },
+        "hint": {
+          "de": "Lädt die Batterie aus dem Stromnetz mit der angegebenen Leistung für die angegebene Dauer. Danach kehrt das System automatisch in den Automatikmodus zurück.",
+          "en": "Charges the battery from the power grid at the specified power for the specified duration. Afterwards the system automatically returns to automatic mode."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=home-power-station"
+          },
+          {
+            "type": "number",
+            "name": "power",
+            "title": {
+              "de": "Leistung (W)",
+              "en": "Power (W)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "number",
+            "name": "duration",
+            "title": {
+              "de": "Dauer (Minuten)",
+              "en": "Duration (minutes)"
+            },
+            "required": true,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      },
+      {
         "id": "configure_emergency_reserve",
         "title": {
           "de": "Setzt die Notstromreserve",

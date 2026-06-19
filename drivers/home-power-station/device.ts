@@ -70,9 +70,19 @@ import {DeviceDiagnostic, DiagnosticSnapshot} from '../../src/utils/device-diagn
 import {ExportDiagnosticReportActionCard} from '../../src/cards/action/export-diagnostic-report.action.card';
 import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
+import {
+  SetPowerModeAutoActionCard,
+  SetPowerModeChargeActionCard,
+  SetPowerModeDischargeActionCard,
+  SetPowerModeGridChargeActionCard,
+  SetPowerModeIdleActionCard,
+  POWER_MODE_AUTO,
+} from '../../src/cards/action/set-power-mode.action.card';
+import {PowerModeState} from '../../src/model/home-power-station';
 
 
 const SYNC_INTERVAL = 1000 * 20; // 20 sec
+const POWER_MODE_REFRESH_INTERVAL = 1000 * 10; // 10 sec
 const MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE = 5
 class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private firmwareChangedTrigger: SimpleValueChangedTrigger<string> | null = null
@@ -92,6 +102,8 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private currentEmergencyPowerState: EmergencyPowerState | null = null
 
   private loopId: NodeJS.Timeout |null = null
+  private powerModeState: PowerModeState | null = null
+  private powerModeLoopId: NodeJS.Timeout | null = null
   private api: RscpApi | undefined = undefined
   private syncErrorCount: number = 0
   private updateBatteryData = true
@@ -172,6 +184,40 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     return this.currentEmergencyPowerState;
   }
 
+  setPowerModeState(state: PowerModeState | null): void {
+    this.powerModeState = state
+    if (this.powerModeLoopId) {
+      clearTimeout(this.powerModeLoopId)
+      this.powerModeLoopId = null
+    }
+    if (state !== null) {
+      this.schedulePowerModeRefresh()
+    }
+  }
+
+  private schedulePowerModeRefresh() {
+    this.powerModeLoopId = this.homey.setTimeout(() => this.refreshPowerMode(), POWER_MODE_REFRESH_INTERVAL)
+  }
+
+  private refreshPowerMode() {
+    this.powerModeLoopId = null
+    const state = this.powerModeState
+    if (!state) {
+      return
+    }
+    if (Date.now() >= state.expiresAt) {
+      this.log('Power mode expired, reverting to auto')
+      this.powerModeState = null
+      this.getApi()
+          .setPowerMode(POWER_MODE_AUTO, 0, true, this)
+          .catch(e => this.error('Power mode auto revert failed: ' + formatError(e)))
+      return
+    }
+    this.getApi()
+        .setPowerMode(state.mode, state.powerW, true, this)
+        .catch(e => this.error('Power mode refresh failed: ' + formatError(e)))
+    this.schedulePowerModeRefresh()
+  }
 
 
   private setupTriggerCards() {
@@ -316,11 +362,20 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     this.setupConfigureEmergencyPowerReserve()
     this.setupRemoveEmergencyPowerReserve()
     this.setupExportDiagnosticReportCard()
+    this.setupPowerModeActionCards()
   }
 
   private setupExportDiagnosticReportCard() {
     const card = this.homey.flow.getActionCard('export_diagnostic_report')
     card.registerRunListener(new ExportDiagnosticReportActionCard().run)
+  }
+
+  private setupPowerModeActionCards() {
+    this.homey.flow.getActionCard('set_power_mode_auto').registerRunListener(new SetPowerModeAutoActionCard().run)
+    this.homey.flow.getActionCard('set_power_mode_idle').registerRunListener(new SetPowerModeIdleActionCard().run)
+    this.homey.flow.getActionCard('set_power_mode_charge').registerRunListener(new SetPowerModeChargeActionCard().run)
+    this.homey.flow.getActionCard('set_power_mode_discharge').registerRunListener(new SetPowerModeDischargeActionCard().run)
+    this.homey.flow.getActionCard('set_power_mode_grid_charge').registerRunListener(new SetPowerModeGridChargeActionCard().run)
   }
 
   private setupRemoveEmergencyPowerReserve() {
@@ -898,6 +953,9 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
     this.log('HomePowerStationDevice has been deleted');
     if (this.loopId) {
       clearTimeout(this.loopId)
+    }
+    if (this.powerModeLoopId) {
+      clearTimeout(this.powerModeLoopId)
     }
     new RscpApi().closeOwnConnection(this).then()
   }
