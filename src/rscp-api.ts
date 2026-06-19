@@ -576,11 +576,11 @@ export class RscpApi {
                             resolve(result)
                         })
                         .catch(reason => this.handleSetPowerModeError(
-                            mode, powerW, false, reason, resolve, reject, log
+                            mode, powerW, allowReconnect, reason, resolve, reject, log
                         ))
                 })
                 .catch(reason => this.handleSetPowerModeError(
-                    mode, powerW, false, reason, resolve, reject, log
+                    mode, powerW, allowReconnect, reason, resolve, reject, log
                 ))
         })
     }
