@@ -75,7 +75,7 @@
   },
   "widget": {
     "consumption": "Verbrauch",
-    "pv-delivery": "PV Leistung",
+    "pv-delivery": "PV-Leistung",
     "grid": {
       "feed-in": "Netzeinspeisung",
       "purchase": "Netzbezug",
