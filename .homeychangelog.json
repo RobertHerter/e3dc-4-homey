@@ -1,4 +1,8 @@
 {
+  "1.5.21": {
+    "de": "- App-Crash mit nur „[object Object]“ behoben — RSCP-/Verbindungsfehler (z. B. Timeout) erscheinen als lesbare Meldung\n- Widget power-overview: abgesichert bei fehlenden Capabilities",
+    "en": "- Fixed app crash showing only “[object Object]” — RSCP/connection errors (e.g. timeout) now show readable messages\n- power-overview widget: hardened when capabilities are missing"
+  },
   "1.5.20": {
     "de": "- Einheitliche Energie-Bezeichnungen über alle Geräte und Capabilities (Beitrag @RobertHerter)\n- Akku → Batterie, Netz-Präfix (Netzbezug / Netzeinspeisung), einheitliche Schreibweise (PV-Leistung, Batterieleistung, Max./Min.)\n- Widget: „Bat. Bezug“ korrigiert zu „Bat. Entladung“",
     "en": "- Consistent energy labels across devices and capabilities (contribution @RobertHerter)\n- Battery naming harmonized, grid prefix (grid import / grid feed-in), unified spelling (PV power, battery power, Max./Min.)\n- Widget: “Bat. import” corrected to “Bat. discharge”"

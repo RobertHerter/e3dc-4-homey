@@ -42,7 +42,7 @@ import {WallboxLiveStateConverter} from './converter/wallbox-live-state-converte
 import {SummaryData} from './model/summary-data';
 import {SummaryType} from './model/summary.config';
 import {Logger} from './internal-api/logger';
-import {formatError} from './utils/error-utils';
+import {formatError, rejectAsError} from './utils/error-utils';
 import {startOfLocalCalendarDay} from './utils/grid-cumulative-archive';
 import {BatteryData, DCBData} from './model/battery-data';
 import {LogRscpCommunicationListener} from './utils/log-rscp-communication-listener';
@@ -122,7 +122,7 @@ export class RscpApi {
                     .catch(e => {
                         log.error('getOpenConnection: Creating new connection failed')
                         log.error(formatError(e))
-                        reject(e)
+                        rejectAsError(reject, e)
                     })
             }
         })
@@ -324,7 +324,7 @@ export class RscpApi {
                                         log.error('readBatteryData: failed to close connection')
                                         log.error(formatError(reason1))
                                     })
-                                    reject(reason)
+                                    rejectAsError(reject, reason)
                                 })
                         })
                         .catch(reason => {
@@ -338,12 +338,12 @@ export class RscpApi {
                                         .catch(reason1 => {
                                             log.error('readBatteryData: Failed to read battery data')
                                             log.error(formatError(reason1))
-                                            reject(reason)
+                                            rejectAsError(reject, reason)
                                         })
                                     ).catch(reason1 => {
                                         log.error('readBatteryData: Failed to close connection')
                                         log.error(formatError(reason1))
-                                        reject(reason)
+                                        rejectAsError(reject, reason)
                                     })
                             }
                         })
@@ -543,14 +543,14 @@ export class RscpApi {
                         .catch(e => {
                             log.log('startManualCharge(' + amountWh + ': Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
         }
         else {
             log.log('startManualCharge(' + amountWh + ': Received error. Error: ' + causingError)
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -643,7 +643,7 @@ export class RscpApi {
                                     .catch(reject)
                             })
                     } else {
-                        reject(e)
+                        rejectAsError(reject, e)
                     }
                 })
         })
@@ -679,10 +679,10 @@ export class RscpApi {
                         });
                         resolve(states);
                     } catch (e) {
-                        reject(e);
+                        rejectAsError(reject, e);
                     }
                 })
-                .catch(e => reject(e));
+                .catch(e => rejectAsError(reject, e));
         });
     }
 
@@ -766,14 +766,14 @@ export class RscpApi {
                         .catch(e => {
                             log.log('readLiveData: Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
         }
         else {
             log.log('readLiveData: Received error. Error: ' + formatError(causingError))
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -802,7 +802,7 @@ export class RscpApi {
                         .catch(e => {
                             log.log('readSummaryData: Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
 
@@ -810,7 +810,7 @@ export class RscpApi {
         else {
             log.log('readSummaryData: Received error.')
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -838,7 +838,7 @@ export class RscpApi {
                         .catch(e => {
                             log.log('writeChargingLimits: Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
 
@@ -846,7 +846,7 @@ export class RscpApi {
         else {
             log.log('writeChargingLimits: Received error.')
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -872,14 +872,14 @@ export class RscpApi {
                         .catch(e => {
                             log.log('readChargingConfiguration: Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
         }
         else {
             log.log('readChargingConfiguration: Received error.')
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -907,14 +907,14 @@ export class RscpApi {
                         .catch(e => {
                             log.log('writeEmergencyPowerReserveError(' + amount + ', ' + asPercentage + ': Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
 
         }
         else {
             log.log('writeEmergencyPowerReserveError(' + amount + ', ' + asPercentage + ': ' + causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -999,14 +999,14 @@ export class RscpApi {
                         .catch(e => {
                             log.log('readConnectedWallboxes: Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
         }
         else {
             log.log('readConnectedWallboxes: Received error. Error: ' + formatError(causingError))
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -1093,11 +1093,11 @@ export class RscpApi {
                 .finally(() => {
                     this.setWallboxExtern(wallboxId, externBytes, false, log)
                         .then(data => resolve(data))
-                        .catch(e => reject(e))
+                        .catch(e => rejectAsError(reject, e))
                 })
         } else {
             log.log('setWallboxExtern: Received error. Error: ' + formatError(causingError))
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -1169,12 +1169,12 @@ export class RscpApi {
                         })
                         .catch(e => {
                             log.log('setWallboxMode: Retry failed also: ' + formatError(e))
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
         } else {
             log.log('setWallboxMode: Received error. Error: ' + formatError(causingError))
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -1573,11 +1573,11 @@ export class RscpApi {
                 .finally(() => {
                     retry()
                         .then(data => resolve(data))
-                        .catch(e => reject(e))
+                        .catch(e => rejectAsError(reject, e))
                 })
         } else {
             log.log(`${operationName}: Received error. Error: ${formatError(causingError)}`)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 
@@ -1636,14 +1636,14 @@ export class RscpApi {
                         .catch(e => {
                             log.log('readConnectedWallboxIds: Retry failed also: ' + formatError(e))
                             log.log(e)
-                            reject(e)
+                            rejectAsError(reject, e)
                         })
                 })
         }
         else {
             log.log('readConnectedWallboxIds: Received error. Error: ' + formatError(causingError))
             log.log(causingError)
-            reject(causingError)
+            rejectAsError(reject, causingError)
         }
     }
 

@@ -1,5 +1,5 @@
 import Homey from 'homey';
-import {formatError} from './src/utils/error-utils';
+import {formatError, normalizeError} from './src/utils/error-utils';
 
 class MyApp extends Homey.App {
 
@@ -10,18 +10,28 @@ class MyApp extends Homey.App {
     this.log('E3DC home-power-station has been initialized');
 
     process.on('unhandledRejection', (reason: unknown) => {
-      this.error('Unhandled promise rejection: ' + formatError(reason));
+      const err = normalizeError(reason);
+      this.error('Unhandled promise rejection: ' + formatError(err));
     });
     process.on('uncaughtException', (err: unknown) => {
-      this.error('Uncaught exception: ' + formatError(err));
+      this.error('Uncaught exception: ' + formatError(normalizeError(err)));
     });
-    // @ts-ignore
-    const powerOverviewWidget = this.homey.dashboards.getWidget('power-overview')
-    // @ts-ignore
-    powerOverviewWidget.registerSettingAutocompleteListener('plantId', async (query, settings) => {
-      let devices = await this.readHomePowerPlants()
-      return devices.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
-    });
+    try {
+      // @ts-ignore
+      const powerOverviewWidget = this.homey.dashboards.getWidget('power-overview')
+      // @ts-ignore
+      powerOverviewWidget.registerSettingAutocompleteListener('plantId', async (query, settings) => {
+        try {
+          const devices = await this.readHomePowerPlants()
+          return devices.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
+        } catch (e) {
+          this.error('Widget plantId autocomplete failed: ' + formatError(e));
+          return [];
+        }
+      });
+    } catch (e) {
+      this.error('Widget power-overview setup failed: ' + formatError(e));
+    }
 
   }
 
@@ -49,41 +59,41 @@ class MyApp extends Homey.App {
     // }
   }
 
+  private readCapabilityNumber(device: Homey.Device, capability: string, fallback = 0): number {
+    if (!device.hasCapability(capability)) {
+      return fallback;
+    }
+    const value = device.getCapabilityValue(capability);
+    return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+  }
+
   async readHomePowerPlants(): Promise<HomePowerPlant[]> {
-    return new Promise(async (resolve, reject) => {
-      const homePowerStations = this.homey.drivers.getDriver('home-power-station').getDevices()
-      let devices = []
-      for(let i = 0; i < homePowerStations.length; i++) {
-        let station = homePowerStations[i];
-        const stationData = await station.getData();
-        const stationId = stationData.id;
-        const name = station.getName()
-        let wallboxPower = 0;
-        let wallboxSolarShare = 0
-        if (station.hasCapability('measure_wallbox_consumption')) {
-          wallboxPower = station.getCapabilityValue('measure_wallbox_consumption')
+    const homePowerStations = this.homey.drivers.getDriver('home-power-station').getDevices()
+    const devices: HomePowerPlant[] = []
+    for (let i = 0; i < homePowerStations.length; i++) {
+      const station = homePowerStations[i];
+      const stationData = await station.getData();
+      const stationId = stationData.id;
+      const name = station.getName()
+      devices.push({
+        name: name,
+        id: stationId,
+        powerState: {
+          consumption: this.readCapabilityNumber(station, 'measure_house_consumption'),
+          pvPower: this.readCapabilityNumber(station, 'measure_power'),
+          gridPower: this.readCapabilityNumber(station, 'measure_grid_delivery') * -1,
+          batteryPower: this.readCapabilityNumber(station, 'measure_battery_delivery'),
+          batteryLevel: this.readCapabilityNumber(station, 'measure_battery'),
+          wallboxPower: this.readCapabilityNumber(station, 'measure_wallbox_consumption'),
+          wallboxSolarShare: this.readCapabilityNumber(station, 'measure_wallbox_solarshare'),
+          externalPowerConnected: station.hasCapability('external_power_delivery_connected')
+            ? !!station.getCapabilityValue('external_power_delivery_connected')
+            : false,
+          externalPower: this.readCapabilityNumber(station, 'measure_external_power_delivery'),
         }
-        if (station.hasCapability('measure_wallbox_solarshare')) {
-          wallboxSolarShare = station.getCapabilityValue('measure_wallbox_solarshare')
-        }
-        devices.push({
-          name: name,
-          id: stationId,
-          powerState: {
-            consumption: station.getCapabilityValue('measure_house_consumption'),
-            pvPower: station.getCapabilityValue('measure_power'),
-            gridPower: station.getCapabilityValue('measure_grid_delivery') * -1,
-            batteryPower: station.getCapabilityValue('measure_battery_delivery'),
-            batteryLevel: station.getCapabilityValue('measure_battery'),
-            wallboxPower: wallboxPower,
-            wallboxSolarShare: wallboxSolarShare,
-            externalPowerConnected: station.getCapabilityValue('external_power_delivery_connected'),
-            externalPower: station.getCapabilityValue('measure_external_power_delivery'),
-          }
-        })
-      }
-      resolve(devices)
-    })
+      })
+    }
+    return devices
   }
 
   async demoTest(): Promise<string> {
@@ -106,7 +116,9 @@ interface PowerStatus {
   batteryPower: number,
   batteryLevel: number,
   wallboxPower: number,
-  wallboxSolarShare: number
+  wallboxSolarShare: number,
+  externalPowerConnected: boolean,
+  externalPower: number,
 }
 
 interface LogEntry {

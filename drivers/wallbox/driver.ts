@@ -19,6 +19,7 @@ import {WallboxSunModeIsOffConditionCard} from '../../src/cards/condition/wallbo
 import {WallboxChargingIsAllowedConditionCard} from '../../src/cards/condition/wallbox-charging-is-allowed.condition.card';
 import {WallboxChargingIsBlockedConditionCard} from '../../src/cards/condition/wallbox-charging-is-blocked.condition.card';
 import {RunListener} from '../../src/cards/run-listener';
+import {formatError} from '../../src/utils/error-utils';
 
 class WallboxDriver extends Homey.Driver {
 
@@ -39,7 +40,7 @@ class WallboxDriver extends Homey.Driver {
       try {
         this.homey.flow.getConditionCard(id).registerRunListener(listener.run);
       } catch (e) {
-        this.log(`Condition card ${id} not registered: ` + e);
+        this.log(`Condition card ${id} not registered: ` + formatError(e));
       }
     });
   }
@@ -63,7 +64,7 @@ class WallboxDriver extends Homey.Driver {
       try {
         this.homey.flow.getActionCard(id).registerRunListener(listener.run);
       } catch (e) {
-        this.log(`Flow card ${id} not registered: ` + e);
+        this.log(`Flow card ${id} not registered: ` + formatError(e));
       }
     });
   }
