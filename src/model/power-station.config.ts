@@ -7,7 +7,7 @@ export interface PowerStationConfig {
     timeout?: number,
     batteryInfo: string,
     rscpCapacity: string,
-    shouldCapacityOverwritten: boolean,
-    customCapacity: number,
+    rscpAsoc: string,
+    rscpSoh: string,
     debugMode: boolean
 }

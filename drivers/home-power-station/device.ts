@@ -66,6 +66,8 @@ import {Wallbox} from '../../src/model/wallbox';
 import {GridMeterConfig} from '../../src/model/grid-meter.config';
 import {GridMeter} from '../../src/model/grid-meter';
 import {formatError} from '../../src/utils/error-utils';
+import {formatSohPercent, resolveUsableCapacityWh} from '../../src/utils/battery-capacity';
+import {BatteryData} from '../../src/model/battery-data';
 import {DeviceDiagnostic, DiagnosticSnapshot} from '../../src/utils/device-diagnostic';
 import {ExportDiagnosticReportActionCard} from '../../src/cards/action/export-diagnostic-report.action.card';
 import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
@@ -477,23 +479,31 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
 
   public getBatteryCapacity(): Promise<number> {
     return new Promise((resolve, reject) => {
-      const storedSettings: PowerStationConfig = this.getSettings();
-      if (storedSettings.shouldCapacityOverwritten) {
-        resolve(storedSettings.customCapacity)
-      }
-      else {
-        const api = this.getApi()
-        api.readBatteryData(true, this)
-            .then(value => {
-              resolve(value[0].capacity)
-            })
-            .catch(reason => {
-              this.error('getBatteryCapacity: Error reading battery data: ' + formatError(reason))
-              reject(reason)
-            })
-      }
+      this.getApi()
+          .readBatteryData(true, this)
+          .then(value => {
+            resolve(resolveUsableCapacityWh(value[0]))
+          })
+          .catch(reason => {
+            this.error('getBatteryCapacity: Error reading battery data: ' + formatError(reason))
+            reject(reason)
+          })
     })
-}
+  }
+
+  private updateBatteryCapacitySettings(battery: BatteryData): void {
+    const storedSettings: PowerStationConfig = this.getSettings()
+    const usableWh = resolveUsableCapacityWh(battery)
+    const updated: PowerStationConfig = {
+      ...storedSettings,
+      rscpCapacity: Math.round(battery.capacity).toString(),
+      rscpAsoc: Math.round(usableWh).toString(),
+      rscpSoh: formatSohPercent(usableWh, battery.capacity),
+    }
+    this.setSettings(updated).catch(reason => {
+      this.log('Failed to store battery capacity settings: ' + formatError(reason))
+    })
+  }
 
   public getApi(): RscpApi {
     if (this.api) {
@@ -679,14 +689,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       station
           .readBatteryData(true, this)
           .then(batteryData => {
-            let storedSettings: PowerStationConfig = this.getSettings()
-            if (storedSettings.rscpCapacity == '0') {
-              storedSettings = {
-                ...storedSettings,
-                rscpCapacity: batteryData[0].capacity.toString()
-              }
-              this.setSettings(storedSettings).then(value => this.log('Stored RSCP capacity'))
-            }
+            this.updateBatteryCapacitySettings(batteryData[0])
 
             const batteryDevices = this.homey.drivers.getDriver('battery-module').getDevices()
             const stationId = this.getId()
@@ -699,17 +702,14 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
               if (batteryConfig.stationId == stationId) {
                 this.log('Updating battery device: ' + currentDevice.getName())
                 const batteryDevice = currentDevice as unknown as BatteryModule
-                this.getBatteryCapacity().then(capa => {
-                  batteryDevice.sync(
+                const usableWh = resolveUsableCapacityWh(batteryData[0])
+                batteryDevice.sync(
                       batteryData[0],
                       result.batteryChargingLevel * 100,
-                      capa / 1000.0,
+                      usableWh / 1000.0,
                       result.batteryDelivery * -1,
                       result.chargingConfig,
                       result.emergencyPowerState)
-                }).catch(reason => {
-                  this.log('Battery detail sync capacity read failed: ' + formatError(reason))
-                })
 
               }
             })

@@ -1,4 +1,8 @@
 {
+  "1.6.1": {
+    "de": "- HKW Batteriedaten: Nennkapazität, nutzbare Kapazität (ASOC) und SOH (%) werden automatisch angezeigt\n- Eigenen Kapazitätswert entfernt — ASOC wird für manuelles Laden, Restladezeit und Batterie-Kachel verwendet (genauere %-Ziele)",
+    "en": "- HPS battery settings: specified capacity, usable capacity (ASOC) and SOH (%) shown automatically\n- Removed custom capacity override — ASOC is used for manual charging, remaining charge time and battery tile (more accurate % targets)"
+  },
   "1.6.0": {
     "de": "- HKW: EMS-Steuerung über fünf neue Flow-Aktionen (Automatik, Batterie pausieren, forciert laden/entladen, Netzladen) — Beitrag @RobertHerter\n- HKW: Befehl wird alle 10 s erneut gesendet; nach Ablauf der Dauer kehrt das EMS automatisch in den Automatikmodus zurück\n- Flow-Trigger: Vorzeichen-Hinweise für Batterie- und Netzleistung korrigiert\n- Widget: „PV-Leistung“ (Schreibweise)",
     "en": "- HPS: EMS control via five new flow actions (auto, pause battery, force charge/discharge, grid charge) — contribution @RobertHerter\n- HPS: command resent every 10 s; after the duration expires EMS returns to automatic mode\n- Flow triggers: corrected sign hints for battery and grid power\n- Widget: “PV power” label spelling"

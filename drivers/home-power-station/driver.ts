@@ -17,9 +17,9 @@ class HomePowerStationDriver extends Homey.Driver {
     stationPort: 5033,
     timeout: 5,
     batteryInfo: '',
-    customCapacity: 0,
     rscpCapacity: '0',
-    shouldCapacityOverwritten: false,
+    rscpAsoc: '0',
+    rscpSoh: '—',
     debugMode: false
   }
 
