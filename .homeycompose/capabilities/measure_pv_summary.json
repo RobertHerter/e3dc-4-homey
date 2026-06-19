@@ -1,8 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "PV",
-    "de": "PV"
+    "en": "PV generation",
+    "de": "PV-Erzeugung"
   },
   "getable": true,
   "setable": false,

@@ -1,8 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "Battery charged",
-    "de": "Batterie geladen"
+    "en": "Battery charge",
+    "de": "Batterieladung"
   },
   "getable": true,
   "setable": false,
