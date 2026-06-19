@@ -1,6 +1,6 @@
 export type DiagnosticLevel = 'info' | 'warn' | 'error';
 
-export interface DiagnosticEntry {
+export interface DiagnosticAnalysisEntry {
     at: Date;
     level: DiagnosticLevel;
     message: string;
@@ -32,53 +32,119 @@ export interface DiagnosticSnapshot {
     wallboxChargePlanText?: string;
 }
 
-const MAX_ENTRIES = 20;
-const MAX_REPORT_CHARS = 6000;
+/** Persisted analysis events — append-only; oldest trimmed only above this count. */
+export const MAX_ANALYSIS_ENTRIES = 100;
+
+/** Total report size cap (forum copy); analysis section is never dropped before snapshot. */
+export const MAX_REPORT_CHARS = 12000;
+
+const FORUM_URL = 'https://community.homey.app/t/app-pro-e3dc-hauskraftwerke/105181';
+
+export function parseAnalysisLogFromStore(raw: unknown): DiagnosticAnalysisEntry[] {
+    if (!Array.isArray(raw)) {
+        return [];
+    }
+    const entries: DiagnosticAnalysisEntry[] = [];
+    for (const item of raw) {
+        if (!item || typeof item !== 'object') {
+            continue;
+        }
+        const record = item as { at?: string; level?: string; message?: string };
+        if (typeof record.message !== 'string' || record.message.length === 0) {
+            continue;
+        }
+        const level = record.level === 'warn' || record.level === 'error' || record.level === 'info'
+            ? record.level
+            : 'info';
+        const at = typeof record.at === 'string' ? new Date(record.at) : new Date();
+        entries.push({ at: Number.isNaN(at.getTime()) ? new Date() : at, level, message: record.message });
+    }
+    return entries;
+}
+
+export function serializeAnalysisLog(entries: DiagnosticAnalysisEntry[]): Array<{ at: string; level: DiagnosticLevel; message: string }> {
+    return entries.map(entry => ({
+        at: entry.at.toISOString(),
+        level: entry.level,
+        message: entry.message,
+    }));
+}
+
+export function shouldAppendAnalysisEntry(
+    entries: DiagnosticAnalysisEntry[],
+    level: DiagnosticLevel,
+    message: string,
+): boolean {
+    const last = entries[entries.length - 1];
+    if (last && last.level === level && last.message === message) {
+        return false;
+    }
+    return true;
+}
+
+export function appendAnalysisEntry(
+    entries: DiagnosticAnalysisEntry[],
+    level: DiagnosticLevel,
+    message: string,
+): DiagnosticAnalysisEntry[] {
+    if (!shouldAppendAnalysisEntry(entries, level, message)) {
+        return entries;
+    }
+    const next = [...entries, { at: new Date(), level, message }];
+    if (next.length <= MAX_ANALYSIS_ENTRIES) {
+        return next;
+    }
+    return next.slice(next.length - MAX_ANALYSIS_ENTRIES);
+}
 
 export class DeviceDiagnostic {
-    private readonly entries: DiagnosticEntry[] = [];
+    private analysisEntries: DiagnosticAnalysisEntry[];
 
-    push(level: DiagnosticLevel, message: string, at: Date = new Date()): void {
-        this.entries.push({ at, level, message });
-        while (this.entries.length > MAX_ENTRIES) {
-            this.entries.shift();
+    constructor(initialEntries: DiagnosticAnalysisEntry[] = []) {
+        this.analysisEntries = initialEntries;
+    }
+
+    getAnalysisEntries(): readonly DiagnosticAnalysisEntry[] {
+        return this.analysisEntries;
+    }
+
+    replaceAnalysisEntries(entries: DiagnosticAnalysisEntry[]): void {
+        this.analysisEntries = entries;
+    }
+
+    recordAnalysis(level: DiagnosticLevel, message: string): boolean {
+        const trimmed = message.trim();
+        if (trimmed.length === 0) {
+            return false;
         }
-    }
-
-    /** Intentionally not stored — sync status is shown in the report header. */
-    info(_message: string): void {
-        // no-op: only errors are kept for the device log
-    }
-
-    warn(message: string): void {
-        this.push('warn', message);
-    }
-
-    error(message: string): void {
-        this.push('error', message);
+        const before = this.analysisEntries.length;
+        this.analysisEntries = appendAnalysisEntry(this.analysisEntries, level, trimmed);
+        return this.analysisEntries.length > before;
     }
 
     formatReport(snapshot: DiagnosticSnapshot): string {
         const lines: string[] = [];
-        lines.push('E3DC 4 Homey — Diagnose / Diagnostic');
+        lines.push('E3DC 4 Homey — Diagnosebericht / Diagnostic report');
+        lines.push('(Gesamten Text markieren, kopieren, im Forum einfügen / select all, copy, paste in forum)');
+        lines.push('');
+        lines.push('=== Aktueller Stand / Current status ===');
         lines.push(`App: ${snapshot.appVersion}`);
         lines.push(`HKW: ${snapshot.deviceName} (${snapshot.deviceId})`);
         if (snapshot.homeyVersion) {
             lines.push(`Homey: ${snapshot.homeyVersion}`);
         }
-        lines.push(`Erstellt / Created: ${snapshot.lastSyncAt?.toISOString() ?? new Date().toISOString()}`);
-        lines.push('');
+        lines.push(`Stand / as of: ${formatTimestamp(snapshot.lastSyncAt ?? new Date())}`);
         lines.push(
-            `Status: ${snapshot.available ? 'verfügbar / available' : 'nicht verfügbar / unavailable'}`
-            + ` | Sync-Fehler / errors: ${snapshot.syncErrorCount}`,
+            `Gerät / device: ${snapshot.available ? 'verfügbar / available' : 'nicht verfügbar / unavailable'}`
+            + ` | Sync-Fehler in Folge / consecutive sync errors: ${snapshot.syncErrorCount}`,
         );
         if (snapshot.lastSyncResult) {
             lines.push(`Letzter Sync / last sync: ${snapshot.lastSyncResult}`);
         }
         lines.push(
-            `Geräte / devices: Wallbox ${snapshot.wallboxDeviceCount}`
-            + ` | Batteriemonitor / battery monitor ${snapshot.batteryDeviceCount}`
-            + ` | Netz / grid meter ${snapshot.gridMeterDeviceCount}`,
+            `Verknüpft / linked: Wallbox ${snapshot.wallboxDeviceCount}`
+            + ` | Batteriemonitor ${snapshot.batteryDeviceCount}`
+            + ` | Netz ${snapshot.gridMeterDeviceCount}`,
         );
         if (snapshot.firmware) {
             lines.push(`Firmware: ${snapshot.firmware}`);
@@ -89,9 +155,7 @@ export class DeviceDiagnostic {
         lines.push(`  Haus / house: ${formatW(snapshot.houseW)}`);
         lines.push(`  Netz / grid: ${formatW(snapshot.gridW)}`);
         lines.push(`  Batterie / battery: ${formatPct(snapshot.batteryPct)}`);
-        if (snapshot.wallboxSocPercent !== undefined
-            || snapshot.wallboxPlugged !== undefined
-            || snapshot.wallboxAlgHex !== undefined) {
+        if (hasWallboxSection(snapshot)) {
             lines.push('');
             lines.push('Wallbox (letzter Sync / last sync):');
             lines.push(`  Fahrzeug-SOC / vehicle SOC: ${formatPct(snapshot.wallboxSocPercent)}`);
@@ -104,28 +168,71 @@ export class DeviceDiagnostic {
                 lines.push(`  RSCP chargePlanText: ${snapshot.wallboxChargePlanText}`);
             }
             if (snapshot.wallboxSocPercent === 0 || snapshot.wallboxSocPercent === undefined) {
-                lines.push('  Hinweis: E3/DC-Portal (44 %) nutzt oft Cloud — lokales RSCP liefert bei Tesla häufig 0.');
+                lines.push('  Hinweis: E3/DC-Portal nutzt oft Cloud — lokales RSCP liefert bei Tesla häufig 0.');
             }
         }
         lines.push('');
-        lines.push('Fehler-Log (neueste zuerst / error log, newest first):');
-        const errorEntries = this.entries.filter(entry => entry.level === 'error');
-        const logLines = [...errorEntries].reverse().map(entry => formatEntry(entry));
-        if (logLines.length === 0) {
-            lines.push('  (keine Fehler / no errors)');
+        lines.push('=== Analyse-Protokoll / Analysis log ===');
+        lines.push('(Nur analyse-relevante Ereignisse, chronologisch — bleiben erhalten / analysis events, kept)');
+        if (this.analysisEntries.length === 0) {
+            lines.push('  (noch keine Ereignisse / no events yet)');
         } else {
-            lines.push(...logLines.map(line => `  ${line}`));
+            for (const entry of this.analysisEntries) {
+                lines.push(`  ${formatAnalysisLine(entry)}`);
+            }
         }
         lines.push('');
-        lines.push('Forum: Version + diesen Text kopieren (Einstellungen → Diagnose oder Flow-Token).');
+        lines.push(`Forum: ${FORUM_URL}`);
         lines.push('Keine Passwörter / no passwords in this report.');
 
         let report = lines.join('\n');
         if (report.length > MAX_REPORT_CHARS) {
-            report = `${report.slice(0, MAX_REPORT_CHARS - 20)}\n… (gekürzt / truncated)`;
+            report = truncateReportPreservingAnalysis(lines, this.analysisEntries, MAX_REPORT_CHARS);
         }
         return report;
     }
+}
+
+function hasWallboxSection(snapshot: DiagnosticSnapshot): boolean {
+    return snapshot.wallboxSocPercent !== undefined
+        || snapshot.wallboxPlugged !== undefined
+        || snapshot.wallboxAlgHex !== undefined;
+}
+
+function truncateReportPreservingAnalysis(
+    lines: string[],
+    analysisEntries: DiagnosticAnalysisEntry[],
+    maxChars: number,
+): string {
+    const headerEnd = lines.findIndex(line => line.startsWith('=== Analyse-Protokoll'));
+    const header = headerEnd >= 0 ? lines.slice(0, headerEnd).join('\n') : lines.join('\n');
+    const footer = [
+        '',
+        `Forum: ${FORUM_URL}`,
+        'Keine Passwörter / no passwords in this report.',
+        '… (Analyse-Protokoll gekürzt — älteste Einträge entfernt / analysis log trimmed)',
+    ].join('\n');
+    const analysisHeader = '=== Analyse-Protokoll / Analysis log ===\n(Nur analyse-relevante Ereignisse, chronologisch — bleiben erhalten / analysis events, kept)';
+    let budget = maxChars - header.length - footer.length - analysisHeader.length - 4;
+    if (budget < 200) {
+        return `${header.slice(0, maxChars - 40)}\n… (gekürzt / truncated)`;
+    }
+    const analysisLines: string[] = [];
+    for (let i = analysisEntries.length - 1; i >= 0; i--) {
+        const line = `  ${formatAnalysisLine(analysisEntries[i])}`;
+        if (analysisLines.join('\n').length + line.length + 1 > budget) {
+            break;
+        }
+        analysisLines.unshift(line);
+    }
+    if (analysisLines.length < analysisEntries.length) {
+        analysisLines.unshift('  … (ältere Einträge wegen Längenlimit entfernt / older entries removed due to length limit)');
+    }
+    return [header, '', analysisHeader, ...analysisLines, footer].join('\n');
+}
+
+function formatTimestamp(date: Date): string {
+    return date.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 }
 
 function formatW(value: number | undefined): string {
@@ -156,8 +263,7 @@ function formatRaw(value: number | undefined): string {
     return String(Math.round(value));
 }
 
-function formatEntry(entry: DiagnosticEntry): string {
-    const time = entry.at.toISOString().slice(11, 19);
+function formatAnalysisLine(entry: DiagnosticAnalysisEntry): string {
     const prefix = entry.level === 'error' ? 'ERR' : entry.level === 'warn' ? 'WRN' : 'INF';
-    return `[${time}] ${prefix} ${entry.message}`;
+    return `[${formatTimestamp(entry.at)}] ${prefix} ${entry.message}`;
 }

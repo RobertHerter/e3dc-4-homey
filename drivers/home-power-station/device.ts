@@ -68,7 +68,12 @@ import {GridMeter} from '../../src/model/grid-meter';
 import {formatError} from '../../src/utils/error-utils';
 import {formatSohPercent, resolveUsableCapacityWh} from '../../src/utils/battery-capacity';
 import {BatteryData} from '../../src/model/battery-data';
-import {DeviceDiagnostic, DiagnosticSnapshot} from '../../src/utils/device-diagnostic';
+import {
+  DeviceDiagnostic,
+  DiagnosticSnapshot,
+  parseAnalysisLogFromStore,
+  serializeAnalysisLog,
+} from '../../src/utils/device-diagnostic';
 import {ExportDiagnosticReportActionCard} from '../../src/cards/action/export-diagnostic-report.action.card';
 import {EnergyMeterIntegrator} from '../../src/utils/energy-meter-integrator';
 import {ensureCapabilities} from '../../src/utils/energy-capability-migration';
@@ -86,6 +91,7 @@ import {PowerModeState} from '../../src/model/home-power-station';
 const SYNC_INTERVAL = 1000 * 20; // 20 sec
 const POWER_MODE_REFRESH_INTERVAL = 1000 * 10; // 10 sec
 const MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE = 5
+const DIAGNOSTIC_ANALYSIS_STORE_KEY = 'diagnosticAnalysisLog'
 class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private firmwareChangedTrigger: SimpleValueChangedTrigger<string> | null = null
   private maxChargingLimitHasChangedTrigger: SimpleValueChangedTrigger<number> | null = null
@@ -157,6 +163,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
 
   private doInit() {
     this.migrateLegacyCapabilities().then()
+    this.loadDiagnosticAnalysisLog()
 
     this.setupActionCards()
     this.setupConditionCards()
@@ -467,8 +474,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
         .catch(reason => {
           const message = formatError(reason)
           this.error('Auto sync failed: ' + message)
-          this.diagnostic.error('Auto-Sync: ' + message)
-          this.publishDiagnosticReport().catch(() => undefined)
+          this.recordAnalysisEvent('error', 'Auto-Sync: ' + message)
           this.loopId = setTimeout(() => this.autoSync(), SYNC_INTERVAL)
         })
   }
@@ -582,7 +588,9 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
             this.publishDiagnosticReport().catch(() => undefined)
             this.syncErrorCount++
             if (this.syncErrorCount >= MAX_ALLOWED_ERROR_BEFORE_UNAVAILABLE) {
-              this.setUnavailable(this.homey.__('messages.hps-not-available')).then()
+              const unavailableMessage = this.homey.__('messages.hps-not-available')
+              this.recordAnalysisEvent('warn', 'HKW nicht verfügbar / unavailable: ' + unavailableMessage)
+              this.setUnavailable(unavailableMessage).then()
             }
             resolve(undefined)
           })
@@ -759,8 +767,10 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   }
 
   private handleAvailability() {
+    const wasUnavailable = !this.getAvailable()
     this.syncErrorCount = 0
-    if (!this.getAvailable()) {
+    if (wasUnavailable) {
+      this.recordAnalysisEvent('info', 'HKW wieder verfügbar / available again')
       this.setAvailable().then()
     }
   }
@@ -873,7 +883,33 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       batteryDeviceCount: this.countLinkedDevices('battery-module'),
       gridMeterDeviceCount: this.countLinkedDevices('grid-meter'),
       firmware: this.lastSnapshot.firmware,
+      wallboxSocPercent: this.lastSnapshot.wallboxSocPercent,
+      wallboxPlugged: this.lastSnapshot.wallboxPlugged,
+      wallboxSocRaw: this.lastSnapshot.wallboxSocRaw,
+      wallboxAlgPrecharge: this.lastSnapshot.wallboxAlgPrecharge,
+      wallboxAlgHex: this.lastSnapshot.wallboxAlgHex,
+      wallboxChargePlanSoc: this.lastSnapshot.wallboxChargePlanSoc,
+      wallboxChargePlanText: this.lastSnapshot.wallboxChargePlanText,
     }
+  }
+
+  private loadDiagnosticAnalysisLog(): void {
+    const stored = this.getStoreValue(DIAGNOSTIC_ANALYSIS_STORE_KEY)
+    this.diagnostic.replaceAnalysisEntries(parseAnalysisLogFromStore(stored))
+  }
+
+  private async persistDiagnosticAnalysisLog(): Promise<void> {
+    const serialized = serializeAnalysisLog([...this.diagnostic.getAnalysisEntries()])
+    await this.setStoreValue(DIAGNOSTIC_ANALYSIS_STORE_KEY, serialized)
+  }
+
+  private recordAnalysisEvent(level: 'info' | 'warn' | 'error', message: string): void {
+    if (!this.diagnostic.recordAnalysis(level, message)) {
+      return
+    }
+    this.persistDiagnosticAnalysisLog()
+        .catch(reason => this.log('Failed to persist analysis log: ' + formatError(reason)))
+    this.publishDiagnosticReport().catch(() => undefined)
   }
 
   private async publishDiagnosticReport(): Promise<void> {
@@ -883,8 +919,12 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   }
 
   private recordSyncSuccess(result: LiveData): void {
+    const hadSyncError = this.lastSyncResult === 'error'
     this.lastSyncAt = new Date()
     this.lastSyncResult = 'ok'
+    if (hadSyncError) {
+      this.recordAnalysisEvent('info', 'Sync wiederhergestellt / sync restored')
+    }
     const wallbox = result.wallboxPowerState[0]
     const wallboxDiag = wallbox?.socDiagnostics
     this.lastSnapshot = {
@@ -907,7 +947,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
   private recordSyncFailure(message: string): void {
     this.lastSyncAt = new Date()
     this.lastSyncResult = 'error'
-    this.diagnostic.error(message)
+    this.recordAnalysisEvent('error', message)
   }
 
   private countLinkedDevices(driverId: string): number {

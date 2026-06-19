@@ -1,4 +1,8 @@
 {
+  "1.6.4": {
+    "de": "- HKW Diagnosebericht: Analyse-Protokoll bleibt erhalten (Fehler, Wiederherstellung, Verfügbarkeit) — nicht von neuen Syncs gelöscht\n- Forum-taugliches Format; Textfeld zum einfachen Kopieren",
+    "en": "- HPS diagnostic report: analysis log persists (errors, recovery, availability) — not cleared by new syncs\n- Forum-friendly format; textarea for easy copy"
+  },
   "1.6.3": {
     "de": "- HKW Batteriedaten: Bezeichnungen präzisiert — „Nutzbare Kapazität (Wh/%)“ statt ASOC/SOH",
     "en": "- HPS battery settings: clearer labels — “Usable capacity (Wh/%)” instead of ASOC/SOH"
