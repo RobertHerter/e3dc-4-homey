@@ -9,5 +9,4 @@ export interface PowerStationConfig {
     rscpCapacity: string,
     rscpAsoc: string,
     rscpSoh: string,
-    debugMode: boolean
 }

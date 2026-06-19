@@ -1,4 +1,8 @@
 {
+  "1.6.5": {
+    "de": "- HKW: Debug-Modus entfernt — Support über Diagnosebericht (Einstellungen → Diagnose)",
+    "en": "- HPS: removed debug mode — use diagnostic report (Settings → Diagnosis) for support"
+  },
   "1.6.4": {
     "de": "- HKW Diagnosebericht: Analyse-Protokoll bleibt erhalten (Fehler, Wiederherstellung, Verfügbarkeit) — nicht von neuen Syncs gelöscht\n- Forum-taugliches Format; Textfeld zum einfachen Kopieren",
     "en": "- HPS diagnostic report: analysis log persists (errors, recovery, availability) — not cleared by new syncs\n- Forum-friendly format; textarea for easy copy"

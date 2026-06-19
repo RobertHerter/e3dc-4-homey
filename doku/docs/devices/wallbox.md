@@ -56,7 +56,7 @@ The advanced current card uses `WBTag.REQ_SET_MODE`.
 - Activate RSCP password on your E3/DC as described in the main docs.
 - Wallbox devices are discovered via the already paired HPS device(s).
 - Test flows with your real wallbox – firmware variants may behave slightly differently.
-- Enable debug mode on the HPS device if a command fails; RSCP requests are then logged.
+- Copy the diagnostic report from HPS device settings (Diagnosis) if a command fails.
 
 **EXTERN_DATA_ALG (6 bytes, read via `WBTag.REQ_EXTERN_DATA_ALG`):**
 

@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "de.jnkconsulting.e3dc.v2",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "brandColor": "#7AB31B",
@@ -435,28 +435,6 @@
               "hint": {
                 "en": "Usable capacity relative to specified capacity (usable Wh ÷ nominal × 100). Includes degradation and E3DC internal limits.",
                 "de": "Nutzbare Kapazität relativ zur Nennkapazität (nutzbar Wh ÷ Nennwert × 100). Enthält Degradation und E3DC-interne Grenzen."
-              }
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Other",
-            "de": "Sonstiges"
-          },
-          "children": [
-            {
-              "id": "debugMode",
-              "type": "checkbox",
-              "value": false,
-              "label": {
-                "en": "Debug mode",
-                "de": "Debug Modus"
-              },
-              "hint": {
-                "en": "If activated, more information is written to the Homey log. Only activate the switch when prompted if you have reported a problem yourself.",
-                "de": "Wenn aktiviert, werden mehr Informationen in das Log von Homey geschrieben. Aktiviert den Schalter nur nach Aufforderung, wenn ihr selbst ein Problem gemeldet habt."
               }
             }
           ]

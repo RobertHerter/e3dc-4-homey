@@ -20,7 +20,6 @@ class HomePowerStationDriver extends Homey.Driver {
     rscpCapacity: '0',
     rscpAsoc: '0',
     rscpSoh: '—',
-    debugMode: false
   }
 
   onPair(session: PairSession): Promise<void> {
@@ -64,7 +63,7 @@ class HomePowerStationDriver extends Homey.Driver {
         }
 
         const api = new RscpApi()
-        api.init(easyRscpConnectionData, false, this)
+        api.init(easyRscpConnectionData, this)
         api.readLiveData(true, this)
             .then(e => resolve(this.homey.__('setup.connection-test.success')))
             .catch(e => {

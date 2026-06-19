@@ -533,7 +533,7 @@ class HomePowerStationDevice extends Homey.Device implements HomePowerStation{
       rscpPassword: storedSettings.rscpKey,
       connectionTimeoutMillis: timeoutMillis,
       readTimeoutMillis: timeoutMillis,
-    }, storedSettings.debugMode, this)
+    }, this)
     return this.api
   }
 

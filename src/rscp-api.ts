@@ -33,7 +33,6 @@ import {
     DefaultWallboxService,
     RequestWallboxIdsCreator,
     WallboxDeviceIdsConverter,
-    RSCPRequestResponseListener, RijndaelJsAESCipherFactory, DefaultSocketFactory, DefaultFrameParser
 } from 'easy-rscp';
 import {LiveData} from './model/live-data';
 import {SyncDataFrameConverter} from './converter/SyncDataFrameConverter';
@@ -46,7 +45,6 @@ import {Logger} from './internal-api/logger';
 import {formatError, rejectAsError} from './utils/error-utils';
 import {startOfLocalCalendarDay} from './utils/grid-cumulative-archive';
 import {BatteryData, DCBData} from './model/battery-data';
-import {LogRscpCommunicationListener} from './utils/log-rscp-communication-listener';
 import {
     DEFAULT_WALLBOX_CURRENT_A,
     WALLBOX_EXTERN_DATA_LEN,
@@ -76,28 +74,14 @@ export class RscpApi {
 
     private connectionData: E3dcConnectionData | undefined = undefined
 
-    init(data: E3dcConnectionData, debugMode: boolean, log: Logger) {
+    init(data: E3dcConnectionData, log: Logger) {
         if (this.connectionData) {
             const currentConnection = connectionMap.get(this.getKey())
             this.closeConnection(currentConnection, log).then()
         }
         this.connectionData = data
-        if (debugMode) {
-            const listener: RSCPRequestResponseListener[] = [new LogRscpCommunicationListener(log)]
-            const newFactory = new DefaultHomePowerPlantConnectionFactory(
-                this.connectionData,
-                new RijndaelJsAESCipherFactory(this.connectionData.rscpPassword),
-                new DefaultSocketFactory(),
-                new DefaultFrameParser(),
-                listener
-                )
-            connectionFactoryMap.set(this.getKey(), newFactory)
-        }
-        else {
-            const newFactory = new DefaultHomePowerPlantConnectionFactory(this.connectionData)
-            connectionFactoryMap.set(this.getKey(), newFactory)
-        }
-
+        const newFactory = new DefaultHomePowerPlantConnectionFactory(this.connectionData)
+        connectionFactoryMap.set(this.getKey(), newFactory)
     }
 
     private getKey(): string {
