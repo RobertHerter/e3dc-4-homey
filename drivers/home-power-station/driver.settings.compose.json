@@ -114,26 +114,26 @@
         "id": "rscpAsoc",
         "type": "label",
         "label": {
-          "en": "Usable capacity ASOC (Wh)",
-          "de": "Nutzbare Kapazität ASOC (Wh)"
+          "en": "Usable capacity (Wh)",
+          "de": "Nutzbare Kapazität (Wh)"
         },
         "value": "0",
         "hint": {
-          "en": "Current usable full-charge capacity (ASOC). Used automatically for manual charging, remaining time and battery tile.",
-          "de": "Aktuell nutzbare Voll-Ladekapazität (ASOC). Wird automatisch für manuelles Laden, Restladezeit und Batterie-Kachel verwendet."
+          "en": "Current usable full-charge capacity in Wh. Used automatically for manual charging, remaining time and battery tile.",
+          "de": "Aktuell nutzbare Voll-Ladekapazität in Wh. Wird automatisch für manuelles Laden, Restladezeit und Batterie-Kachel verwendet."
         }
       },
       {
         "id": "rscpSoh",
         "type": "label",
         "label": {
-          "en": "Battery health SOH (%)",
-          "de": "Batteriegesundheit SOH (%)"
+          "en": "Usable capacity (%)",
+          "de": "Nutzbare Kapazität (%)"
         },
         "value": "—",
         "hint": {
-          "en": "Derived from ASOC vs. specified capacity (ASOC ÷ nominal × 100).",
-          "de": "Abgeleitet aus ASOC zur Nennkapazität (ASOC ÷ Nennwert × 100)."
+          "en": "Usable capacity relative to specified capacity (usable Wh ÷ nominal × 100). Includes degradation and E3DC internal limits.",
+          "de": "Nutzbare Kapazität relativ zur Nennkapazität (nutzbar Wh ÷ Nennwert × 100). Enthält Degradation und E3DC-interne Grenzen."
         }
       }
     ]
