@@ -25,6 +25,7 @@ import {
     YearlySummaryConverter,
     DefaultBatteryService,
     EPTag,
+    BatTag,
     DefaultEmergencyPowerService,
     EmergencyPowerState,
     WBTag,
@@ -66,6 +67,7 @@ import {
     EMS_SET_WB_DISCHARGE_BAT_UNTIL,
 } from './model/ems-wallbox-battery-tags';
 import {EMS_REQ_SET_POWER, EMS_REQ_SET_POWER_MODE, EMS_REQ_SET_POWER_VALUE, EMS_SET_POWER} from './model/ems-power-mode-tags';
+import {resolveUsableCapacityWh} from './utils/battery-capacity';
 
 const connectionMap: Map<string, HomePowerPlantConnection> = new Map<string, HomePowerPlantConnection>()
 const connectionFactoryMap: Map<string, HomePowerPlantConnectionFactory> = new Map<string, HomePowerPlantConnectionFactory>()
@@ -255,6 +257,70 @@ export class RscpApi {
         })
     }
 
+    private readBatteryCapacityExtras(
+        connection: HomePowerPlantConnection,
+        batIndex: number,
+        designVoltage: number,
+        log: Logger,
+    ): Promise<{ usableCapacityWh?: number; reserveMaxWh?: number; asocRaw?: number }> {
+        const request = new FrameBuilder()
+            .addData(
+                new DataBuilder().tag(BatTag.REQ_DATA).container(
+                    new DataBuilder().tag(BatTag.INDEX).uint16(batIndex).build(),
+                    new DataBuilder().tag(BatTag.REQ_USABLE_CAPACITY).build(),
+                    new DataBuilder().tag(BatTag.REQ_ASOC).build(),
+                ).build(),
+                new DataBuilder().tag(EPTag.REQ_EP_RESERVE).build(),
+            )
+            .build()
+
+        return connection.send(request)
+            .then(response => {
+                const extras: { usableCapacityWh?: number; reserveMaxWh?: number; asocRaw?: number } = {}
+
+                try {
+                    const usableAh = response.numberByTag(BatTag.USABLE_CAPACITY, BatTag.DATA)
+                    if (usableAh > 0 && designVoltage > 0) {
+                        extras.usableCapacityWh = usableAh * designVoltage
+                    }
+                } catch (_) { /* tag not present */ }
+
+                try {
+                    extras.asocRaw = response.numberByTag(BatTag.ASOC, BatTag.DATA)
+                } catch (_) { /* tag not present */ }
+
+                try {
+                    extras.reserveMaxWh = response.numberByTag(
+                        EPTag.PARAM_EP_RESERVE_MAX_ENERGY, EPTag.EP_RESERVE
+                    )
+                } catch (_) {
+                    try {
+                        extras.reserveMaxWh = response.numberByTag(EPTag.PARAM_EP_RESERVE_MAX_ENERGY)
+                    } catch (_2) { /* tag not present */ }
+                }
+
+                return extras
+            })
+            .catch(reason => {
+                log.log('readBatteryCapacityExtras failed: ' + formatError(reason))
+                return {}
+            })
+    }
+
+    private sumDcbFullChargeWh(
+        dcbSpecs: { fullChargeCapacityAh: number; voltage: number }[],
+        fallbackVoltage: number,
+    ): number | undefined {
+        let total = 0
+        for (const dcb of dcbSpecs) {
+            const voltage = dcb.voltage > 0 ? dcb.voltage : fallbackVoltage
+            if (dcb.fullChargeCapacityAh > 0 && voltage > 0) {
+                total += dcb.fullChargeCapacityAh * voltage
+            }
+        }
+        return total > 0 ? total : undefined
+    }
+
     readBatteryData(allowReconnect: boolean = true, log: Logger): Promise<BatteryData[]> {
         return new Promise<BatteryData[]>((resolve, reject) => {
             log.log('readBatteryData: Requesting connection ...')
@@ -269,7 +335,7 @@ export class RscpApi {
                             log.log('readBatteryData: Reading Monitoring data ...')
                             batteryService
                                 .readMonitoringData()
-                                .then(batteryStatus => {
+                                .then(async batteryStatus => {
                                     log.log('readBatteryData: Reading Monitoring data, answer received')
                                     const result: BatteryData[] = []
                                     let dcbReadOutOk = false
@@ -291,10 +357,47 @@ export class RscpApi {
                                                 })
                                             }
 
+                                            const extras = await this.readBatteryCapacityExtras(
+                                                con, batteryIndex, spec.voltage, log
+                                            )
+                                            const dcbFullChargeWh = this.sumDcbFullChargeWh(
+                                                spec.dcbSpecs, spec.voltage
+                                            )
+                                            const usableWh = resolveUsableCapacityWh({
+                                                index: batteryIndex,
+                                                capacity: spec.capacityWh,
+                                                asoc: status.asoc,
+                                                asocRaw: extras.asocRaw,
+                                                usableCapacityWh: extras.usableCapacityWh,
+                                                reserveMaxWh: extras.reserveMaxWh,
+                                                dcbFullChargeWh,
+                                                name: spec.name,
+                                                maxChargingTempCelsius: spec.maxChargingTempCelsius,
+                                                minChargingTempCelsius: spec.minChargingTempCelsius,
+                                                maxChargeCurrentA: spec.maxChargeCurrentA,
+                                                maxDischargeCurrentA: spec.maxDischargeCurrentA,
+                                                designVoltage: spec.voltage,
+                                                connected: status.connected,
+                                                working: status.working,
+                                                inService: status.inService,
+                                                voltage: status.voltage,
+                                                dcbs,
+                                            })
+                                            log.log(
+                                                'readBatteryData: capacity specified=' + spec.capacityWh
+                                                + 'Wh asoc=' + status.asoc
+                                                + ' usable=' + usableWh + 'Wh'
+                                                + (extras.reserveMaxWh ? ' reserveMax=' + extras.reserveMaxWh : '')
+                                            )
+
                                             result.push({
                                                 index: batteryIndex,
                                                 capacity: spec.capacityWh,
                                                 asoc: status.asoc,
+                                                asocRaw: extras.asocRaw,
+                                                usableCapacityWh: extras.usableCapacityWh,
+                                                reserveMaxWh: extras.reserveMaxWh,
+                                                dcbFullChargeWh,
                                                 name: spec.name,
                                                 maxChargingTempCelsius: spec.maxChargingTempCelsius,
                                                 minChargingTempCelsius: spec.minChargingTempCelsius,

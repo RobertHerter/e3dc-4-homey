@@ -1,4 +1,8 @@
 {
+  "1.6.2": {
+    "de": "- HKW Batteriedaten: ASOC-Auslese korrigiert — nutzbare Kapazität aus USABLE_CAPACITY, Notstrom-Reserve-Max., DCB Full-Charge oder ASOC (je nach E3DC-Modell)\n- ASOC-Wert 1 Wh / SOH 0 % behoben (falsche Skalierung auf manchen Geräten)",
+    "en": "- HPS battery settings: fixed ASOC read — usable capacity from USABLE_CAPACITY, emergency reserve max, DCB full-charge or ASOC (model-dependent)\n- Fixed ASOC showing 1 Wh / SOH 0% (wrong scaling on some units)"
+  },
   "1.6.1": {
     "de": "- HKW Batteriedaten: Nennkapazität, nutzbare Kapazität (ASOC) und SOH (%) werden automatisch angezeigt\n- Eigenen Kapazitätswert entfernt — ASOC wird für manuelles Laden, Restladezeit und Batterie-Kachel verwendet (genauere %-Ziele)",
     "en": "- HPS battery settings: specified capacity, usable capacity (ASOC) and SOH (%) shown automatically\n- Removed custom capacity override — ASOC is used for manual charging, remaining charge time and battery tile (more accurate % targets)"
