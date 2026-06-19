@@ -88,20 +88,20 @@
         "measure_power": {
           "title": {
             "en": "Battery power",
-            "de": "Akkuleistung"
+            "de": "Batterieleistung"
           }
         },
         "meter_power.charged": {
           "title": {
             "en": "Battery charged (total)",
-            "de": "Akku-Ladung (gesamt)"
+            "de": "Batterie-Ladung (gesamt)"
           },
           "icon": "/assets/images/battery-load.svg"
         },
         "meter_power.discharged": {
           "title": {
             "en": "Battery discharged (total)",
-            "de": "Akku-Entladung (gesamt)"
+            "de": "Batterie-Entladung (gesamt)"
           },
           "icon": "/assets/images/battery-unload.svg"
         }
@@ -2639,7 +2639,7 @@
       "type": "number",
       "title": {
         "en": "Battery power",
-        "de": "Batterie Leistung"
+        "de": "Batterieleistung"
       },
       "getable": true,
       "setable": false,
@@ -2655,8 +2655,8 @@
     "measure_battery_in": {
       "type": "number",
       "title": {
-        "en": "Battery charged",
-        "de": "Batterie geladen"
+        "en": "Battery charge",
+        "de": "Batterieladung"
       },
       "getable": true,
       "setable": false,
@@ -2672,8 +2672,8 @@
     "measure_battery_out": {
       "type": "number",
       "title": {
-        "en": "Battery discharged",
-        "de": "Batterie entladen"
+        "en": "Battery discharge",
+        "de": "Batterieentladung"
       },
       "getable": true,
       "setable": false,
@@ -2754,7 +2754,7 @@
       "type": "number",
       "title": {
         "en": "Grid power",
-        "de": "Netz Leistung"
+        "de": "Netzleistung"
       },
       "getable": true,
       "setable": false,
@@ -2770,8 +2770,8 @@
     "measure_grid_in": {
       "type": "number",
       "title": {
-        "en": "Feed-in",
-        "de": "Einspeisung"
+        "en": "Grid feed-in",
+        "de": "Netzeinspeisung"
       },
       "getable": true,
       "setable": false,
@@ -2787,8 +2787,8 @@
     "measure_grid_out": {
       "type": "number",
       "title": {
-        "en": "Power purchase",
-        "de": "Bezug"
+        "en": "Grid import",
+        "de": "Netzbezug"
       },
       "getable": true,
       "setable": false,
@@ -2839,7 +2839,7 @@
       "type": "number",
       "title": {
         "en": "Max Charging power",
-        "de": "Max Ladeleistung"
+        "de": "Max. Ladeleistung"
       },
       "getable": true,
       "setable": false,
@@ -2856,7 +2856,7 @@
       "type": "number",
       "title": {
         "en": "Max Discharging power",
-        "de": "Max Entladeleistung"
+        "de": "Max. Entladeleistung"
       },
       "getable": true,
       "setable": false,
@@ -2889,8 +2889,8 @@
     "measure_pv_summary": {
       "type": "number",
       "title": {
-        "en": "PV",
-        "de": "PV"
+        "en": "PV generation",
+        "de": "PV-Erzeugung"
       },
       "getable": true,
       "setable": false,
@@ -2926,7 +2926,7 @@
       "type": "number",
       "title": {
         "en": "Max cell temperature",
-        "de": "Max Zelltemperatur"
+        "de": "Max. Zelltemperatur"
       },
       "units": {
         "de": "°C",
@@ -2996,7 +2996,7 @@
       "type": "number",
       "title": {
         "en": "Battery discharge limit",
-        "de": "Batterie Entladegrenze"
+        "de": "Batterie-Entladegrenze"
       },
       "getable": true,
       "setable": false,
