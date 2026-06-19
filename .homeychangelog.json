@@ -1,4 +1,8 @@
 {
+  "1.6.0": {
+    "de": "- HKW: EMS-Steuerung über fünf neue Flow-Aktionen (Automatik, Batterie pausieren, forciert laden/entladen, Netzladen) — Beitrag @RobertHerter\n- HKW: Befehl wird alle 10 s erneut gesendet; nach Ablauf der Dauer kehrt das EMS automatisch in den Automatikmodus zurück\n- Flow-Trigger: Vorzeichen-Hinweise für Batterie- und Netzleistung korrigiert\n- Widget: „PV-Leistung“ (Schreibweise)",
+    "en": "- HPS: EMS control via five new flow actions (auto, pause battery, force charge/discharge, grid charge) — contribution @RobertHerter\n- HPS: command resent every 10 s; after the duration expires EMS returns to automatic mode\n- Flow triggers: corrected sign hints for battery and grid power\n- Widget: “PV power” label spelling"
+  },
   "1.5.21": {
     "de": "- App-Crash mit nur „[object Object]“ behoben — RSCP-/Verbindungsfehler (z. B. Timeout) erscheinen als lesbare Meldung\n- Widget power-overview: abgesichert bei fehlenden Capabilities",
     "en": "- Fixed app crash showing only “[object Object]” — RSCP/connection errors (e.g. timeout) now show readable messages\n- power-overview widget: hardened when capabilities are missing"
