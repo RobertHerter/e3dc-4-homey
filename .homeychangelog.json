@@ -1,4 +1,8 @@
 {
+  "1.5.20": {
+    "de": "- Einheitliche Energie-Bezeichnungen über alle Geräte und Capabilities (Beitrag @RobertHerter)\n- Akku → Batterie, Netz-Präfix (Netzbezug / Netzeinspeisung), einheitliche Schreibweise (PV-Leistung, Batterieleistung, Max./Min.)\n- Widget: „Bat. Bezug“ korrigiert zu „Bat. Entladung“",
+    "en": "- Consistent energy labels across devices and capabilities (contribution @RobertHerter)\n- Battery naming harmonized, grid prefix (grid import / grid feed-in), unified spelling (PV power, battery power, Max./Min.)\n- Widget: “Bat. import” corrected to “Bat. discharge”"
+  },
   "1.5.19": {
     "de": "- Spenden-Link: GitHub Sponsors (Copiis)\n- HKW: „PV-Erzeugung (gesamt)“ statt generischem „Energie“ — kumulativ seit Pairing, nicht Tages-PV\n- Wallbox: „Ladeenergie (gesamt)“ für den kWh-Zähler\n- Homepage verweist auf die Doku; Metadaten (Tags) bereinigt",
     "en": "- Donate link: GitHub Sponsors (Copiis)\n- HPS: “PV generation (total)” instead of generic “Energy” — cumulative since pairing, not daily PV\n- Wallbox: “Charging energy (total)” for the kWh counter\n- Homepage points to docs; metadata (tags) cleaned up"
